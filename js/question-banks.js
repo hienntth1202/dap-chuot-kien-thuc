@@ -27,7 +27,7 @@ export const QUESTION_BANKS = {
       q('DG16', "\\left(\\sqrt[n]{x}\\right)'=?,\\quad n\\in\\mathbb{N}^*,\\ n>1", '\\frac{1}{n\\sqrt[n]{x^{n-1}}}', ['\\frac{1}{\\sqrt[n]{x^{n-1}}}', '\\frac{n}{\\sqrt[n]{x^{n-1}}}', '\\frac{1}{n\\sqrt[n]{x^n}}'], 2, 'Căn bậc n'),
 
       q('DG17', "\\left(\\sqrt[n]{u}\\right)'=?,\\quad n\\in\\mathbb{N}^*,\\ n>1", "\\frac{u'}{n\\sqrt[n]{u^{n-1}}}", ['\\frac{1}{n\\sqrt[n]{u^{n-1}}}', "\\frac{nu'}{\\sqrt[n]{u^{n-1}}}", "\\frac{u'}{n\\sqrt[n]{u^n}}"], 3, 'Căn bậc n hàm hợp'),
-      q('DG18', "\\left(\\frac{k}{u}\\right)'=?,\\quad k\\text{ là hằng số}", "-\\frac{k u'}{u^2}", ['\\frac{k u'}{u^2}', '-\\frac{k}{u^2}', "-\\frac{k u'}{u}"], 3, 'Thương với hằng số'),
+      q('DG18', "\\left(\\frac{k}{u}\\right)'=?,\\quad k\\text{ là hằng số}", "-\\frac{k u'}{u^2}", ["\\frac{k u'}{u^2}", '-\\frac{k}{u^2}', "-\\frac{k u'}{u}"], 3, 'Thương với hằng số'),
     ],
   },
 

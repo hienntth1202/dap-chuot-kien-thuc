@@ -1,9 +1,14 @@
-# Đập Chuột Kiến Thức V1.5.3
+# Đập Chuột Kiến Thức V1.5.4
+
+## Hotfix quan trọng
+- Sửa lỗi ES Module trong `js/question-banks.js` ở câu DG18 `(k/u)'`.
+- Lỗi cũ làm `question-banks.js` không tải được, kéo theo script trang chủ dừng và nút **Chơi cá nhân** không phản hồi.
+- Không thay đổi luật chơi, điểm, giao diện mobile hay bộ 18 công thức tổng quát ngoài việc sửa cú pháp.
 
 Web game Toán nhẹ, chạy bằng HTML/CSS/JavaScript. Chế độ cá nhân không cần backend. Chế độ lớp dùng Firebase Realtime Database để đồng bộ phòng, đội và điểm.
 
 
-## Điểm mới V1.5.3
+## Điểm mới V1.5.4
 
 - Thêm chủ đề **Công thức đạo hàm tổng quát** gồm 18 công thức từ bảng công thức giáo viên cung cấp.
 - Bao gồm: quy tắc tổng, tích, thương, nhân hằng số, `(k/u)'`, đạo hàm hằng số, lũy thừa `x^α` và `u^α`, căn bậc hai, nghịch đảo, căn bậc `n`, sin/cos của `x` và của `u`.
