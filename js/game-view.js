@@ -53,11 +53,32 @@ const MOLE_SVG = `
   <ellipse cx="94" cy="104" rx="15" ry="8" fill="#c2410c"/>
 </svg>`;
 
+function fitAnswerMath(element) {
+  if (!element?.matches?.('[data-sign]')) return;
+  const katex = element.querySelector('.katex');
+  if (!katex) return;
+
+  // Mỗi lần chuột đổi hang, đưa công thức về cỡ chuẩn trước khi đo lại.
+  // Công thức ngắn được giữ thật lớn; công thức dài chỉ co khi thực sự cần.
+  katex.style.fontSize = '';
+
+  window.requestAnimationFrame(() => {
+    if (!element.isConnected) return;
+    const availableWidth = Math.max(24, element.clientWidth - 14);
+    const renderedWidth = katex.getBoundingClientRect().width;
+    if (!renderedWidth || renderedWidth <= availableWidth) return;
+
+    const fitScale = Math.max(0.68, Math.min(1, availableWidth / renderedWidth));
+    katex.style.fontSize = `${fitScale}em`;
+  });
+}
+
 export function renderMath(latex, element) {
   if (!element) return;
   if (window.katex) {
     try {
       window.katex.render(latex, element, { throwOnError: false, displayMode: false });
+      fitAnswerMath(element);
       return;
     } catch (error) {
       console.warn('KaTeX render error:', error);
@@ -176,7 +197,7 @@ export class MoleGame {
       <div class="game-footer">
         <span class="team-pill ${this.teamName ? '' : 'hidden'}" data-team>${escapeHtml(this.teamName)}</span>
         <button class="btn btn-light" type="button" data-sound>🔊 Âm thanh</button>
-        <span class="muted small">Đúng +10 · Sai -5 · 3 câu đúng liên tiếp +10 · ${this.questionLimit} câu · Chuột đổi hang 2,0–4,0 giây tùy độ khó</span>
+        <span class="muted small game-rules">Đúng +10 · Sai -5 · 3 câu đúng liên tiếp +10 · ${this.questionLimit} câu · Chuột đổi hang 2,0–4,0 giây tùy độ khó</span>
       </div>
     `;
 

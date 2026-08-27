@@ -1,6 +1,36 @@
 import { filterQuestionsByDifficulty, normalizeQuestionCount, seededShuffle } from './engine.js';
 
 export const QUESTION_BANKS = {
+  derivative_general: {
+    id: 'derivative_general',
+    subject: 'Toán',
+    title: 'Công thức đạo hàm tổng quát',
+    instruction: 'Chọn công thức đạo hàm tổng quát đúng:',
+    description: 'Quy tắc tổng, tích, thương và các công thức đạo hàm tổng quát với u=u(x), v=v(x).',
+    questions: [
+      q('DG01', "(u+v)'=?", "u'+v'", ["u'v'", 'u+v', "u'-v'"], 1, 'Quy tắc tổng'),
+      q('DG02', "(ku)'=?,\\quad k\\text{ là hằng số}", "ku'", ["k'u", 'ku', "u'"], 1, 'Nhân hằng số'),
+      q('DG03', "(C)'=?", '0', ['C', '1', "C'"], 1, 'Hằng số'),
+      q('DG04', "(x^\\alpha)'=?,\\quad \\alpha\\in\\mathbb{R}", '\\alpha x^{\\alpha-1}', ['(\\alpha-1)x^{\\alpha}', '\\alpha x^{\\alpha}', 'x^{\\alpha-1}'], 1, 'Lũy thừa'),
+      q('DG05', "(\\sqrt{x})'=?", '\\frac{1}{2\\sqrt{x}}', ['\\frac{1}{\\sqrt{x}}', '-\\frac{1}{2\\sqrt{x}}', '2\\sqrt{x}'], 1, 'Căn bậc hai'),
+      q('DG06', "\\left(\\frac{1}{x}\\right)'=?", '-\\frac{1}{x^2}', ['\\frac{1}{x^2}', '-\\frac{1}{x}', '1'], 1, 'Nghịch đảo'),
+      q('DG07', "(\\sin x)'=?", '\\cos x', ['-\\cos x', '\\sin x', '-\\sin x'], 1, 'Sin'),
+      q('DG08', "(\\cos x)'=?", '-\\sin x', ['\\sin x', '-\\cos x', '\\cos x'], 1, 'Cos'),
+
+      q('DG09', "(u\\,v)'=?", "u'v+uv'", ["u'v'", "u'v-uv'", "uv'"], 2, 'Quy tắc tích'),
+      q('DG10', "\\left(\\frac{u}{v}\\right)'=?,\\quad v\\ne0", "\\frac{u'v-uv'}{v^2}", ["\\frac{u'v+uv'}{v^2}", "\\frac{u'v-uv'}{v}", "\\frac{u'}{v'}"], 2, 'Quy tắc thương'),
+      q('DG11', "(u^\\alpha)'=?,\\quad \\alpha\\in\\mathbb{R}", "\\alpha u^{\\alpha-1}u'", ['\\alpha u^{\\alpha-1}', "u^{\\alpha-1}u'", "\\alpha u^\\alpha u'"], 2, 'Lũy thừa hàm hợp'),
+      q('DG12', "(\\sqrt{u})'=?", "\\frac{u'}{2\\sqrt{u}}", ['\\frac{1}{2\\sqrt{u}}', "\\frac{2u'}{\\sqrt{u}}", "-\\frac{u'}{2\\sqrt{u}}"], 2, 'Căn hàm hợp'),
+      q('DG13', "\\left(\\frac{1}{u}\\right)'=?", "-\\frac{u'}{u^2}", ["\\frac{u'}{u^2}", "-\\frac{1}{u^2}", "-\\frac{u'}{u}"], 2, 'Nghịch đảo hàm hợp'),
+      q('DG14', "(\\sin u)'=?", "u'\\cos u", ['\\cos u', "-u'\\cos u", "u'\\sin u"], 2, 'Sin hàm hợp'),
+      q('DG15', "(\\cos u)'=?", "-u'\\sin u", ['-\\sin u', "u'\\sin u", "-u'\\cos u"], 2, 'Cos hàm hợp'),
+      q('DG16', "\\left(\\sqrt[n]{x}\\right)'=?,\\quad n\\in\\mathbb{N}^*,\\ n>1", '\\frac{1}{n\\sqrt[n]{x^{n-1}}}', ['\\frac{1}{\\sqrt[n]{x^{n-1}}}', '\\frac{n}{\\sqrt[n]{x^{n-1}}}', '\\frac{1}{n\\sqrt[n]{x^n}}'], 2, 'Căn bậc n'),
+
+      q('DG17', "\\left(\\sqrt[n]{u}\\right)'=?,\\quad n\\in\\mathbb{N}^*,\\ n>1", "\\frac{u'}{n\\sqrt[n]{u^{n-1}}}", ['\\frac{1}{n\\sqrt[n]{u^{n-1}}}', "\\frac{nu'}{\\sqrt[n]{u^{n-1}}}", "\\frac{u'}{n\\sqrt[n]{u^n}}"], 3, 'Căn bậc n hàm hợp'),
+      q('DG18', "\\left(\\frac{k}{u}\\right)'=?,\\quad k\\text{ là hằng số}", "-\\frac{k u'}{u^2}", ['\\frac{k u'}{u^2}', '-\\frac{k}{u^2}', "-\\frac{k u'}{u}"], 3, 'Thương với hằng số'),
+    ],
+  },
+
   derivative_basic: {
     id: 'derivative_basic',
     subject: 'Toán',

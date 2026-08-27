@@ -1,8 +1,24 @@
-# Đập Chuột Kiến Thức V1.5.1
+# Đập Chuột Kiến Thức V1.5.3
 
 Web game Toán nhẹ, chạy bằng HTML/CSS/JavaScript. Chế độ cá nhân không cần backend. Chế độ lớp dùng Firebase Realtime Database để đồng bộ phòng, đội và điểm.
 
-## Điểm mới V1.5.1
+
+## Điểm mới V1.5.3
+
+- Thêm chủ đề **Công thức đạo hàm tổng quát** gồm 18 công thức từ bảng công thức giáo viên cung cấp.
+- Bao gồm: quy tắc tổng, tích, thương, nhân hằng số, `(k/u)'`, đạo hàm hằng số, lũy thừa `x^α` và `u^α`, căn bậc hai, nghịch đảo, căn bậc `n`, sin/cos của `x` và của `u`.
+- Chủ đề mới có thể chơi riêng hoặc tích chọn cùng các chủ đề khác trong chế độ ôn tập nhiều chủ đề.
+- Các công thức tổng quát dùng câu dẫn riêng: **“Chọn công thức đạo hàm tổng quát đúng:”** để học sinh phân biệt với câu tính đạo hàm của một hàm số cụ thể.
+
+## Điểm mới V1.5.2
+
+### Mobile UI V1.5.2
+- Công thức trên bảng đáp án lớn hơn rõ rệt trên điện thoại.
+- Bảng đáp án cao hơn để dễ đọc và dễ chạm.
+- Công thức dài tự co theo chiều rộng khung, công thức ngắn vẫn giữ cỡ lớn.
+- Dòng luật chơi phía dưới được thu gọn trên màn hình nhỏ.
+- Không thay đổi logic game, điểm, combo, thời gian đổi hang hoặc Firebase.
+
 
 1. Giáo viên và học sinh cá nhân có thể chọn **nhiều chủ đề cùng lúc**.
 2. Khi chọn nhiều chủ đề, game **chia số câu tương đối đều** giữa các chủ đề; cùng phòng dùng cùng tập câu, nhưng thứ tự mỗi học sinh khác nhau.
@@ -50,6 +66,6 @@ Nếu địa chỉ trang giáo viên là `127.0.0.1` hoặc `localhost`, QR sẽ
 V1 không dùng tài khoản và không nên lưu dữ liệu nhạy cảm. Nên yêu cầu học sinh nhập tên ngắn/tên gọi trong lớp. Lịch sử câu sai chi tiết chỉ giữ trên máy học sinh; Firebase chỉ nhận một bản đồ đếm số lần sai theo mã câu để giáo viên tạo Top 3 câu cả lớp cần ôn.
 
 
-## V1.5.1
+## V1.5.2
 - Nhãn câu hỏi theo loại kiến thức. Các chủ đề đạo hàm hiển thị “Đạo hàm của hàm số sau là:”.
 - Kiến trúc hỗ trợ từng câu/từng ngân hàng có `instruction`, để sau này thêm nguyên hàm với nhãn riêng mà không sửa game engine.

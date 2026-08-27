@@ -195,13 +195,14 @@ button { cursor: pointer; }
   background: white;
   border: 2px solid #1f2937;
   border-radius: 11px;
-  font-size: clamp(.68rem, 2.25vw, .98rem);
+  font-size: clamp(.9rem, 1.8vw, 1.08rem);
   line-height: 1.05;
   font-weight: 950;
   box-shadow: 0 5px 10px rgba(15,23,42,.18);
   overflow: visible;
 }
-.sign .katex { font-size: 1em; }
+.sign .katex { font-size: 1em; max-width: 100%; }
+.sign .katex-html { max-width: 100%; }
 .mole-face {
   position: relative;
   z-index: 11;
@@ -288,7 +289,15 @@ td { font-size: .91rem; }
   .stat-box { flex: 1; }
   .mole-grid { gap: 7px; }
   .board { padding: 9px; }
-  .sign { min-height: 42px; }
+  .sign {
+    min-height: 54px;
+    padding: 8px 6px;
+    font-size: clamp(1.08rem, 4.8vw, 1.32rem);
+    line-height: 1.08;
+  }
+  .game-footer { margin-top: 9px; gap: 7px; }
+  .game-footer .btn { min-height: 48px; font-size: 1rem; }
+  .game-rules { width: 100%; text-align: center; font-size: .72rem; line-height: 1.35; }
 }
 
 /* V1.3 - Xem lại các câu đã bấm sai */

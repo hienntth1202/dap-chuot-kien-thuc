@@ -526,7 +526,7 @@ function refreshQuestionCountOptions(preferredValue = null) {
   ensureAtLeastOneTopic();
   const ids = selectedTopicIds();
   const available = countAvailableQuestions(ids, els.difficulty.value);
-  const previous = preferredValue ?? Number(els.questionCount.value) || 0;
+  const previous = preferredValue ?? (Number(els.questionCount.value) || 0);
   const standard = [5, 10, 15, 20, 25, 30, 40, 50].filter((count) => count < available);
   const options = [...standard, available].filter((value, index, arr) => value >= 3 && arr.indexOf(value) === index);
   els.questionCount.innerHTML = '';
