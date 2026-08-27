@@ -1,0 +1,55 @@
+# Đập Chuột Kiến Thức V1.5.1
+
+Web game Toán nhẹ, chạy bằng HTML/CSS/JavaScript. Chế độ cá nhân không cần backend. Chế độ lớp dùng Firebase Realtime Database để đồng bộ phòng, đội và điểm.
+
+## Điểm mới V1.5.1
+
+1. Giáo viên và học sinh cá nhân có thể chọn **nhiều chủ đề cùng lúc**.
+2. Khi chọn nhiều chủ đề, game **chia số câu tương đối đều** giữa các chủ đề; cùng phòng dùng cùng tập câu, nhưng thứ tự mỗi học sinh khác nhau.
+3. Màn hình giáo viên có **QR vào phòng**; học sinh quét QR rồi chỉ cần nhập tên.
+4. Trước mỗi vòng có **đếm ngược 3–2–1–CHIẾN**.
+5. Random nhóm có màn hình **công bố đội** trên điện thoại học sinh.
+6. Bảng giáo viên có **Team Energy realtime** và thông báo khi một thành viên đạt combo.
+7. Combo 3 câu đúng liên tiếp vẫn thưởng +10, nhưng có animation/âm thanh rõ hơn.
+8. **30 giây cuối = Frenzy Mode**: giao diện căng hơn; máy giáo viên có nhịp báo 10 giây cuối; nhạc nền tăng tốc nhẹ nếu đang phát.
+9. Giáo viên có nút **Ẩn/hiện bảng điểm** để tạo bất ngờ cuối trận.
+10. Cuối trận có màn **công bố đội thắng + top 3 đội**.
+11. Giáo viên thấy **3 câu cả lớp sai nhiều nhất** trong vòng vừa chơi.
+12. Có **Chơi lại** và **Chơi lại + Random đội**, không cần học sinh nhập lại mã phòng.
+13. Có **Preset tiết học** lưu bằng localStorage trên máy giáo viên: chủ đề, độ khó, thời gian, số câu, số đội.
+14. Giữ nguyên các chức năng V1.4.1: xem lại câu sai trên từng máy, tiếng chuột chít-chít, nhạc nền giáo viên, câu khó hiện lâu hơn, chuột đổi hang liên tục, tốc độ phản hồi/câu-phút.
+
+## Cấu trúc
+
+- `index.html`: trang chủ + cài đặt chơi cá nhân.
+- `personal.html`: game cá nhân.
+- `teacher.html`: tạo phòng, QR, random đội, dashboard realtime.
+- `student.html`: học sinh vào phòng và chơi.
+- `js/question-banks.js`: kho câu hỏi. Đây là file chính để mở rộng nội dung về sau.
+- `js/game-view.js`: gameplay đập chuột.
+- `js/engine.js`: điểm, combo, random, chia đội.
+- `js/firebase-service.js`: đồng bộ lớp học.
+- `js/config.js`: cấu hình Firebase của giáo viên.
+- `css/styles.css`: giao diện và animation.
+- `database.rules.json`: rules Firebase đơn giản cho V1.
+
+## Chạy thử cá nhân
+
+Mở thư mục bằng VS Code → Live Server → `index.html` → Chơi cá nhân. Không cần Firebase.
+
+## Chế độ lớp
+
+Cần cấu hình Firebase trong `js/config.js`. Sau đó mở `teacher.html`, tạo phòng, học sinh dùng `student.html` hoặc quét QR.
+
+### Lưu ý QR khi chạy trên máy cục bộ
+
+Nếu địa chỉ trang giáo viên là `127.0.0.1` hoặc `localhost`, QR sẽ chứa địa chỉ cục bộ của chính máy giáo viên nên điện thoại khác thường không truy cập được. QR phát huy đúng khi website đã deploy lên Render/GitHub Pages hoặc khi bạn dùng một địa chỉ mạng LAN mà điện thoại truy cập được.
+
+## Dữ liệu học sinh
+
+V1 không dùng tài khoản và không nên lưu dữ liệu nhạy cảm. Nên yêu cầu học sinh nhập tên ngắn/tên gọi trong lớp. Lịch sử câu sai chi tiết chỉ giữ trên máy học sinh; Firebase chỉ nhận một bản đồ đếm số lần sai theo mã câu để giáo viên tạo Top 3 câu cả lớp cần ôn.
+
+
+## V1.5.1
+- Nhãn câu hỏi theo loại kiến thức. Các chủ đề đạo hàm hiển thị “Đạo hàm của hàm số sau là:”.
+- Kiến trúc hỗ trợ từng câu/từng ngân hàng có `instruction`, để sau này thêm nguyên hàm với nhãn riêng mà không sửa game engine.

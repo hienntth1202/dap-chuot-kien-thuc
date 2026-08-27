@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Học sinh | Đập Chuột Kiến Thức</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+  <main class="narrow" id="joinScreen">
+    <div class="topbar"><a class="brand" href="./index.html"><span class="brand-mark">🔨</span><span class="brand-text"><strong>Đập Chuột Kiến Thức</strong><span>Học sinh · V1.5</span></span></a></div>
+    <section class="panel">
+      <h1 style="margin-top:0">Vào phòng</h1>
+      <form id="joinForm">
+        <div class="form-grid">
+          <div class="field"><label for="roomCode">Mã phòng</label><input id="roomCode" inputmode="numeric" maxlength="6" placeholder="6 chữ số" required></div>
+          <div class="field"><label for="studentName">Tên học sinh</label><input id="studentName" maxlength="40" autocomplete="name" placeholder="Ví dụ: Minh Anh" required></div>
+        </div>
+        <div class="actions"><button class="btn btn-green" type="submit">Vào phòng</button></div><div id="joinMessage"></div>
+      </form>
+    </section>
+  </main>
+
+  <main class="narrow hidden" id="lobbyScreen">
+    <section class="panel center">
+      <div class="muted small">MÃ PHÒNG</div><div class="room-code" id="lobbyRoomCode"></div>
+      <h2 id="lobbyTitle">Đang chờ giáo viên...</h2><p class="muted" id="lobbySubtitle"></p>
+      <div class="room-meta" id="lobbyMeta"></div><div class="lobby-player-list" id="lobbyPlayers"></div>
+      <div class="notice notice-success hidden" id="teamNotice"></div>
+    </section>
+  </main>
+
+  <main class="game-shell hidden" id="gameScreen"><div id="gameRoot"></div></main>
+
+  <div class="class-countdown hidden" id="studentCountdown"><div><span id="studentCountdownText">3</span><small>Sẵn sàng đập chuột!</small></div></div>
+
+  <div class="team-reveal hidden" id="teamReveal">
+    <div class="team-reveal-card" id="teamRevealCard"><div class="team-dice">🎲</div><small>BẠN THUỘC</small><strong id="teamRevealName">ĐỘI NEWTON</strong><span>Chuẩn bị chiến cùng đồng đội!</span></div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="studentResultModal">
+    <div class="modal result-modal">
+      <h2>KẾT QUẢ CỦA BẠN</h2><div class="result-score" id="studentResultScore">0</div>
+      <div class="result-grid"><div><strong id="studentResultCorrect">0</strong><span>Đúng</span></div><div><strong id="studentResultAccuracy">0%</strong><span>Chính xác</span></div><div><strong id="studentResultSpeed">0</strong><span>Câu/phút</span></div></div>
+      <p class="muted" id="studentResultTeam"></p>
+      <div class="notice notice-success hidden" id="studentNoWrongNotice">🎉 Tuyệt vời! Bạn không bấm sai câu nào trong trận này.</div>
+      <details class="wrong-review hidden" id="studentWrongReview"><summary id="studentWrongReviewSummary">📚 Xem lại câu sai</summary><div class="wrong-review-list" id="studentWrongReviewList"></div></details>
+      <p class="muted small">Nếu giáo viên bấm “Chơi lại”, bạn sẽ tự vào vòng mới — không cần nhập lại mã phòng.</p>
+      <a class="btn btn-light" href="./index.html">Về trang chủ</a>
+    </div>
+  </div>
+
+  <script type="module" src="./js/student.js"></script>
+</body>
+</html>

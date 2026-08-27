@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chơi cá nhân | Đập Chuột Kiến Thức</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+  <main class="game-shell">
+    <div id="gameRoot"></div>
+  </main>
+
+  <div class="modal-backdrop hidden" id="resultModal">
+    <div class="modal result-modal">
+      <h2>HẾT GIỜ!</h2>
+      <div class="result-score" id="resultScore">0</div>
+      <div class="result-grid">
+        <div><strong id="resultCorrect">0</strong><span>Đúng</span></div>
+        <div><strong id="resultAccuracy">0%</strong><span>Chính xác</span></div>
+        <div><strong id="resultQpm">0</strong><span>Câu/phút</span></div>
+      </div>
+      <p class="muted" id="resultCombo"></p>
+
+      <div class="notice notice-success hidden" id="noWrongNotice">🎉 Tuyệt vời! Bạn không bấm sai câu nào trong trận này.</div>
+      <details class="wrong-review hidden" id="wrongReview">
+        <summary id="wrongReviewSummary">📚 Xem lại câu sai</summary>
+        <div class="wrong-review-list" id="wrongReviewList"></div>
+      </details>
+
+      <div class="actions" style="justify-content:center">
+        <button class="btn btn-primary" id="playAgain">🔁 Chơi lại</button>
+        <a class="btn btn-light" href="./index.html">Trang chủ</a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/personal.js"></script>
+</body>
+</html>

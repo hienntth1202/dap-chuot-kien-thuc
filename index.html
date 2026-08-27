@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Đập Chuột Kiến Thức</title>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+  <main class="narrow">
+    <div class="topbar">
+      <a class="brand" href="./index.html">
+        <span class="brand-mark">🔨</span>
+        <span class="brand-text"><strong>Đập Chuột Kiến Thức</strong><span>Game công thức cho lớp học</span></span>
+      </a>
+    </div>
+
+    <section class="panel hero">
+      <h1>HỌC CÔNG THỨC<br>THEO CÁCH VUI HƠN</h1>
+      <p>Chọn chơi cá nhân hoặc tổ chức một trận đấu theo lớp. Điểm đội bằng tổng điểm của tất cả thành viên.</p>
+
+      <div class="mode-grid">
+        <button class="mode-card" type="button" id="showPersonal">
+          <span class="mode-icon">👤</span>
+          <h2>Chơi cá nhân</h2>
+          <p>Không cần Firebase. Chọn chủ đề, thời gian và bắt đầu ngay.</p>
+        </button>
+        <a class="mode-card" href="./teacher.html">
+          <span class="mode-icon">👥</span>
+          <h2>Chơi theo lớp</h2>
+          <p>Giáo viên tạo phòng, random đội và theo dõi điểm/tốc độ realtime.</p>
+        </a>
+      </div>
+    </section>
+
+    <section class="panel hidden" id="personalPanel">
+      <h2 style="margin-top:0">Cài đặt chơi cá nhân</h2>
+      <form id="personalForm">
+        <div class="form-grid">
+          <div class="field full">
+            <label>Chủ đề <span class="muted small">(có thể chọn nhiều)</span></label>
+            <div class="topic-checklist" id="personalTopics"></div>
+            <div class="topic-actions"><button type="button" class="text-btn" id="personalSelectAll">Chọn tất cả</button><button type="button" class="text-btn" id="personalClearTopics">Bỏ chọn</button></div>
+          </div>
+          <div class="field">
+            <label for="personalDifficulty">Độ khó</label>
+            <select id="personalDifficulty" name="difficulty">
+              <option value="basic">🙂 Cơ bản — chỉ Level 1</option>
+              <option value="normal" selected>😎 Bình thường — Level 1–2</option>
+              <option value="challenge">🔥 Thử thách — Level 1–3</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="personalDuration">Thời gian</label>
+            <select id="personalDuration" name="duration">
+              <option value="60">60 giây</option>
+              <option value="120" selected>2 phút</option>
+              <option value="180">3 phút</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="personalQuestionCount">Số câu</label>
+            <select id="personalQuestionCount" name="questions"></select>
+            <span class="muted small" id="personalQuestionHint"></span>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" type="submit">🔨 Bắt đầu chơi</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h3 style="margin-top:0">Học sinh đã có mã phòng?</h3>
+      <form id="quickJoinForm" class="form-grid">
+        <div class="field">
+          <label for="quickRoom">Mã phòng 6 số</label>
+          <input id="quickRoom" inputmode="numeric" maxlength="6" placeholder="Ví dụ: 683215" required>
+        </div>
+        <div class="field" style="justify-content:end">
+          <button class="btn btn-green" type="submit">Vào phòng học sinh →</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script type="module">
+    import { listQuestionBanks, countAvailableQuestions } from './js/question-banks.js';
+    import { normalizeRoomCode } from './js/engine.js';
+
+    const banks = listQuestionBanks();
+    const topicBox = document.getElementById('personalTopics');
+    const personalDifficulty = document.getElementById('personalDifficulty');
+    const personalQuestionCount = document.getElementById('personalQuestionCount');
+    const personalQuestionHint = document.getElementById('personalQuestionHint');
+
+    banks.forEach((bank, index) => {
+      const label = document.createElement('label');
+      label.className = 'topic-option';
+      label.innerHTML = `<input type="checkbox" value="${bank.id}" ${index === 0 ? 'checked' : ''}><span><strong>${bank.title}</strong><small>${bank.questions.length} câu</small></span>`;
+      topicBox.appendChild(label);
+    });
+
+    function selectedTopics() {
+      return [...topicBox.querySelectorAll('input:checked')].map((input) => input.value);
+    }
+
+    function refreshPersonalQuestionCounts() {
+      let ids = selectedTopics();
+      if (!ids.length) {
+        const first = topicBox.querySelector('input');
+        first.checked = true;
+        ids = [first.value];
+      }
+      const available = countAvailableQuestions(ids, personalDifficulty.value);
+      const previous = Number(personalQuestionCount.value) || 0;
+      const standard = [5, 10, 15, 20, 25, 30, 40, 50].filter((count) => count < available);
+      const options = [...standard, available].filter((value, index, arr) => value >= 3 && arr.indexOf(value) === index);
+      personalQuestionCount.innerHTML = '';
+      options.forEach((count) => {
+        const option = document.createElement('option');
+        option.value = String(count);
+        option.textContent = count === available ? `Tất cả (${available} câu)` : `${count} câu`;
+        personalQuestionCount.appendChild(option);
+      });
+      const preferred = options.includes(previous) ? previous : (options.includes(15) ? 15 : options[0]);
+      personalQuestionCount.value = String(preferred);
+      personalQuestionHint.textContent = `${ids.length} chủ đề · ${available} câu phù hợp. Game sẽ chia câu tương đối đều giữa các chủ đề.`;
+    }
+
+    topicBox.addEventListener('change', refreshPersonalQuestionCounts);
+    personalDifficulty.addEventListener('change', refreshPersonalQuestionCounts);
+    document.getElementById('personalSelectAll').addEventListener('click', () => {
+      topicBox.querySelectorAll('input').forEach((input) => { input.checked = true; });
+      refreshPersonalQuestionCounts();
+    });
+    document.getElementById('personalClearTopics').addEventListener('click', () => {
+      topicBox.querySelectorAll('input').forEach((input) => { input.checked = false; });
+      refreshPersonalQuestionCounts();
+    });
+    refreshPersonalQuestionCounts();
+
+    const personalPanel = document.getElementById('personalPanel');
+    document.getElementById('showPersonal').addEventListener('click', () => {
+      personalPanel.classList.toggle('hidden');
+      if (!personalPanel.classList.contains('hidden')) personalPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    document.getElementById('personalForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const ids = selectedTopics();
+      if (!ids.length) return;
+      const params = new URLSearchParams();
+      params.set('topics', ids.join(','));
+      params.set('difficulty', personalDifficulty.value);
+      params.set('duration', document.getElementById('personalDuration').value);
+      params.set('questions', personalQuestionCount.value);
+      window.location.href = `./personal.html?${params.toString()}`;
+    });
+
+    document.getElementById('quickJoinForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const code = normalizeRoomCode(document.getElementById('quickRoom').value);
+      if (code.length !== 6) return;
+      window.location.href = `./student.html?room=${code}`;
+    });
+  </script>
+</body>
+</html>

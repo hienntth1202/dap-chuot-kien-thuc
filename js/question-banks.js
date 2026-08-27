@@ -1,0 +1,265 @@
+import { filterQuestionsByDifficulty, normalizeQuestionCount, seededShuffle } from './engine.js';
+
+export const QUESTION_BANKS = {
+  derivative_basic: {
+    id: 'derivative_basic',
+    subject: 'Toán',
+    title: 'Đạo hàm cơ bản',
+    instruction: 'Đạo hàm của hàm số sau là:',
+    description: 'Lũy thừa, căn thức, phân thức và đa thức cơ bản.',
+    questions: [
+      q('DB01', 'y=x^2', '2x', ['x', '2x^2', 'x^2'], 1, 'Lũy thừa'),
+      q('DB02', 'y=x^3', '3x^2', ['x^2', '3x', '\\frac{x^4}{4}'], 1, 'Lũy thừa'),
+      q('DB03', 'y=x^4', '4x^3', ['4x^4', 'x^3', '3x^4'], 1, 'Lũy thừa'),
+      q('DB04', 'y=5x^4', '20x^3', ['5x^3', '20x^4', '9x^3'], 1, 'Lũy thừa'),
+      q('DB05', 'y=7x', '7', ['7x', 'x', '0'], 1, 'Hàm bậc nhất'),
+      q('DB06', 'y=12', '0', ['12', '1', '12x'], 1, 'Hằng số'),
+      q('DB07', 'y=\\sqrt{x}', '\\frac{1}{2\\sqrt{x}}', ['\\frac{1}{\\sqrt{x}}', '-\\frac{1}{2\\sqrt{x}}', '2\\sqrt{x}'], 1, 'Căn thức'),
+      q('DB08', 'y=\\frac{1}{x}', '-\\frac{1}{x^2}', ['\\frac{1}{x^2}', '-\\frac{1}{x}', '1'], 1, 'Phân thức'),
+      q('DB09', 'y=x^2-3x+2', '2x-3', ['2x+3', 'x-3', '2x-2'], 1, 'Đa thức'),
+      q('DB10', 'y=3x^2+5x-1', '6x+5', ['3x+5', '6x-1', '6x+4'], 1, 'Đa thức'),
+      q('DB11', 'y=2x^3-x^2+4', '6x^2-2x', ['6x^2-x', '6x-2x', '2x^2-2x'], 2, 'Đa thức'),
+      q('DB12', 'y=4x^5-3x^2+x', '20x^4-6x+1', ['20x^4-3x+1', '20x^5-6x+1', '16x^4-6x+1'], 2, 'Đa thức'),
+      q('DB13', 'y=\\frac{3}{x}', '-\\frac{3}{x^2}', ['\\frac{3}{x^2}', '-\\frac{1}{3x^2}', '-\\frac{3}{x}'], 2, 'Phân thức'),
+      q('DB14', 'y=2\\sqrt{x}', '\\frac{1}{\\sqrt{x}}', ['\\frac{1}{2\\sqrt{x}}', '\\frac{2}{\\sqrt{x}}', '2\\sqrt{x}'], 2, 'Căn thức'),
+      q('DB15', 'y=x^5+\\frac{1}{x}', '5x^4-\\frac{1}{x^2}', ['5x^4+\\frac{1}{x^2}', '4x^5-\\frac{1}{x^2}', '5x^4-\\frac{1}{x}'], 2, 'Tổng hợp'),
+      q('DB16', 'y=\\sqrt{x}+x^3', '\\frac{1}{2\\sqrt{x}}+3x^2', ['\\frac{1}{\\sqrt{x}}+3x^2', '\\frac{1}{2\\sqrt{x}}+x^2', '-\\frac{1}{2\\sqrt{x}}+3x^2'], 2, 'Tổng hợp'),
+      q('DB17', 'y=2x^6-5x^3+4x', '12x^5-15x^2+4', ['12x^5-15x^3+4', '12x^6-15x^2+4', '8x^5-15x^2+4'], 3, 'Đa thức'),
+      q('DB18', 'y=x^7-\\frac{2}{x}', '7x^6+\\frac{2}{x^2}', ['7x^6-\\frac{2}{x^2}', '6x^7+\\frac{2}{x^2}', '7x^6+\\frac{2}{x}'], 3, 'Tổng hợp'),
+    ],
+  },
+
+  derivative_trig: {
+    id: 'derivative_trig',
+    subject: 'Toán',
+    title: 'Đạo hàm lượng giác',
+    instruction: 'Đạo hàm của hàm số sau là:',
+    description: 'sin, cos, tan, cot và các biểu thức lượng giác cơ bản.',
+    questions: [
+      q('DT01', 'y=\\sin x', '\\cos x', ['-\\cos x', '\\sin x', '-\\sin x'], 1, 'Sin'),
+      q('DT02', 'y=\\cos x', '-\\sin x', ['\\sin x', '-\\cos x', '\\cos x'], 1, 'Cos'),
+      q('DT03', 'y=\\tan x', '\\frac{1}{\\cos^2x}', ['-\\frac{1}{\\cos^2x}', '\\frac{1}{\\sin^2x}', '\\cot x'], 1, 'Tan'),
+      q('DT04', 'y=\\cot x', '-\\frac{1}{\\sin^2x}', ['\\frac{1}{\\sin^2x}', '-\\frac{1}{\\cos^2x}', '-\\tan x'], 1, 'Cot'),
+      q('DT05', 'y=3\\sin x', '3\\cos x', ['-3\\cos x', '3\\sin x', '\\cos x'], 1, 'Sin'),
+      q('DT06', 'y=5\\cos x', '-5\\sin x', ['5\\sin x', '-5\\cos x', '-\\sin x'], 1, 'Cos'),
+      q('DT07', 'y=x+\\sin x', '1+\\cos x', ['1-\\cos x', 'x+\\cos x', '1+\\sin x'], 2, 'Tổng hợp'),
+      q('DT08', 'y=x^2+\\cos x', '2x-\\sin x', ['2x+\\sin x', 'x-\\sin x', '2x-\\cos x'], 2, 'Tổng hợp'),
+      q('DT09', 'y=2\\tan x', '\\frac{2}{\\cos^2x}', ['-\\frac{2}{\\cos^2x}', '\\frac{2}{\\sin^2x}', '2\\cot x'], 2, 'Tan'),
+      q('DT10', 'y=4\\cot x', '-\\frac{4}{\\sin^2x}', ['\\frac{4}{\\sin^2x}', '-\\frac{4}{\\cos^2x}', '-4\\tan x'], 2, 'Cot'),
+      q('DT11', 'y=x^3-2\\sin x', '3x^2-2\\cos x', ['3x^2+2\\cos x', '3x-2\\cos x', '3x^2-2\\sin x'], 2, 'Tổng hợp'),
+      q('DT12', 'y=2x^2+3\\cos x', '4x-3\\sin x', ['4x+3\\sin x', '4x-3\\cos x', '2x-3\\sin x'], 2, 'Tổng hợp'),
+      q('DT13', 'y=x^4+\\tan x', '4x^3+\\frac{1}{\\cos^2x}', ['4x^3-\\frac{1}{\\cos^2x}', '4x^4+\\frac{1}{\\cos^2x}', '4x^3+\\frac{1}{\\sin^2x}'], 3, 'Tổng hợp'),
+      q('DT14', 'y=3x^2-\\cot x', '6x+\\frac{1}{\\sin^2x}', ['6x-\\frac{1}{\\sin^2x}', '6x+\\frac{1}{\\cos^2x}', '3x+\\frac{1}{\\sin^2x}'], 3, 'Tổng hợp'),
+    ],
+  },
+
+
+  derivative_chain: {
+    id: 'derivative_chain',
+    subject: 'Toán',
+    title: 'Đạo hàm hàm hợp',
+    instruction: 'Đạo hàm của hàm số sau là:',
+    description: 'Quy tắc dây chuyền với lũy thừa, căn, phân thức và lượng giác.',
+    questions: [
+      q('DC01', 'y=(2x+1)^3', '6(2x+1)^2', ['3(2x+1)^2', '6(2x+1)^3', '2(2x+1)^2'], 1, 'Lũy thừa hàm hợp'),
+      q('DC02', 'y=(3x-2)^4', '12(3x-2)^3', ['4(3x-2)^3', '12(3x-2)^4', '9(3x-2)^3'], 1, 'Lũy thừa hàm hợp'),
+      q('DC03', 'y=\\sqrt{2x+1}', '\\frac{1}{\\sqrt{2x+1}}', ['\\frac{1}{2\\sqrt{2x+1}}', '\\frac{2}{\\sqrt{2x+1}}', '\\sqrt{2x+1}'], 1, 'Căn hàm hợp'),
+      q('DC04', 'y=\\frac{1}{3x+1}', '-\\frac{3}{(3x+1)^2}', ['-\\frac{1}{(3x+1)^2}', '\\frac{3}{(3x+1)^2}', '-\\frac{3}{3x+1}'], 1, 'Phân thức hàm hợp'),
+      q('DC05', 'y=\\sin(2x)', '2\\cos(2x)', ['\\cos(2x)', '-2\\cos(2x)', '2\\sin(2x)'], 1, 'Sin hàm hợp'),
+      q('DC06', 'y=\\cos(3x)', '-3\\sin(3x)', ['3\\sin(3x)', '-\\sin(3x)', '-3\\cos(3x)'], 1, 'Cos hàm hợp'),
+      q('DC07', 'y=\\tan(2x)', '\\frac{2}{\\cos^2(2x)}', ['\\frac{1}{\\cos^2(2x)}', '-\\frac{2}{\\cos^2(2x)}', '\\frac{2}{\\sin^2(2x)}'], 1, 'Tan hàm hợp'),
+      q('DC08', 'y=\\cot(4x)', '-\\frac{4}{\\sin^2(4x)}', ['-\\frac{1}{\\sin^2(4x)}', '\\frac{4}{\\sin^2(4x)}', '-\\frac{4}{\\cos^2(4x)}'], 1, 'Cot hàm hợp'),
+
+      q('DC09', 'y=(x^2+1)^3', '6x(x^2+1)^2', ['3(x^2+1)^2', '6x(x^2+1)^3', '3x(x^2+1)^2'], 2, 'Lũy thừa hàm hợp'),
+      q('DC10', 'y=(2x^2-1)^4', '16x(2x^2-1)^3', ['8x(2x^2-1)^3', '16x(2x^2-1)^4', '4(2x^2-1)^3'], 2, 'Lũy thừa hàm hợp'),
+      q('DC11', 'y=\\sqrt{x^2+1}', '\\frac{x}{\\sqrt{x^2+1}}', ['\\frac{1}{2\\sqrt{x^2+1}}', '\\frac{2x}{\\sqrt{x^2+1}}', '\\frac{x}{2\\sqrt{x^2+1}}'], 2, 'Căn hàm hợp'),
+      q('DC12', 'y=\\frac{1}{x^2+1}', '-\\frac{2x}{(x^2+1)^2}', ['-\\frac{1}{(x^2+1)^2}', '\\frac{2x}{(x^2+1)^2}', '-\\frac{2x}{x^2+1}'], 2, 'Phân thức hàm hợp'),
+      q('DC13', 'y=\\sin(x^2)', '2x\\cos(x^2)', ['\\cos(x^2)', '-2x\\cos(x^2)', '2x\\sin(x^2)'], 2, 'Sin hàm hợp'),
+      q('DC14', 'y=\\cos(x^2+1)', '-2x\\sin(x^2+1)', ['2x\\sin(x^2+1)', '-\\sin(x^2+1)', '-2x\\cos(x^2+1)'], 2, 'Cos hàm hợp'),
+      q('DC15', 'y=\\tan(x^2)', '\\frac{2x}{\\cos^2(x^2)}', ['\\frac{1}{\\cos^2(x^2)}', '-\\frac{2x}{\\cos^2(x^2)}', '\\frac{2x}{\\sin^2(x^2)}'], 2, 'Tan hàm hợp'),
+      q('DC16', 'y=\\cot(3x^2)', '-\\frac{6x}{\\sin^2(3x^2)}', ['-\\frac{3}{\\sin^2(3x^2)}', '\\frac{6x}{\\sin^2(3x^2)}', '-\\frac{6x}{\\cos^2(3x^2)}'], 2, 'Cot hàm hợp'),
+
+      q('DC17', 'y=(x^3-2x)^5', '5(3x^2-2)(x^3-2x)^4', ['5(x^3-2x)^4', '(3x^2-2)(x^3-2x)^4', '5(3x^2-2)(x^3-2x)^5'], 3, 'Lũy thừa hàm hợp'),
+      q('DC18', 'y=\\sqrt{3x^2+1}', '\\frac{3x}{\\sqrt{3x^2+1}}', ['\\frac{6x}{\\sqrt{3x^2+1}}', '\\frac{3}{2\\sqrt{3x^2+1}}', '\\frac{3x}{2\\sqrt{3x^2+1}}'], 3, 'Căn hàm hợp'),
+      q('DC19', 'y=\\frac{1}{x^3+1}', '-\\frac{3x^2}{(x^3+1)^2}', ['-\\frac{1}{(x^3+1)^2}', '\\frac{3x^2}{(x^3+1)^2}', '-\\frac{3x^2}{x^3+1}'], 3, 'Phân thức hàm hợp'),
+      q('DC20', 'y=\\sin(2x^2+1)', '4x\\cos(2x^2+1)', ['2x\\cos(2x^2+1)', '4x\\sin(2x^2+1)', '-4x\\cos(2x^2+1)'], 3, 'Sin hàm hợp'),
+      q('DC21', 'y=\\cos(x^3)', '-3x^2\\sin(x^3)', ['3x^2\\sin(x^3)', '-3x\\sin(x^3)', '-3x^2\\cos(x^3)'], 3, 'Cos hàm hợp'),
+      q('DC22', 'y=\\tan(1-2x)', '-\\frac{2}{\\cos^2(1-2x)}', ['\\frac{2}{\\cos^2(1-2x)}', '-\\frac{1}{\\cos^2(1-2x)}', '-\\frac{2}{\\sin^2(1-2x)}'], 3, 'Tan hàm hợp'),
+      q('DC23', 'y=\\sin^2x', '2\\sin x\\cos x', ['2\\sin x', '\\cos^2x', '-2\\sin x\\cos x'], 3, 'Lũy thừa lượng giác'),
+      q('DC24', 'y=\\cos^3x', '-3\\cos^2x\\sin x', ['3\\cos^2x\\sin x', '-3\\cos x\\sin x', '-3\\cos^3x\\sin x'], 3, 'Lũy thừa lượng giác'),
+    ],
+  },
+
+  derivative_exp_log: {
+    id: 'derivative_exp_log',
+    subject: 'Toán',
+    title: 'Đạo hàm mũ – logarit',
+    instruction: 'Đạo hàm của hàm số sau là:',
+    description: 'Đạo hàm của e^x, a^x, ln x, log_a x và các hàm hợp thường gặp.',
+    questions: [
+      q('DL01', 'y=e^x', 'e^x', ['xe^{x-1}', '1', 'xe^x'], 1, 'Hàm mũ e'),
+      q('DL02', 'y=2^x', '2^x\\ln 2', ['2^x', 'x2^{x-1}', '2^{x-1}'], 1, 'Hàm mũ cơ số a'),
+      q('DL03', 'y=5^x', '5^x\\ln 5', ['5^x', '5x^{4}', 'x5^{x-1}'], 1, 'Hàm mũ cơ số a'),
+      q('DL04', 'y=\\ln x', '\\frac{1}{x}', ['\\ln x', 'x', '-\\frac{1}{x}'], 1, 'Logarit tự nhiên'),
+      q('DL05', 'y=\\log_2x', '\\frac{1}{x\\ln 2}', ['\\frac{1}{x}', '\\frac{\\ln 2}{x}', '\\frac{1}{2x}'], 1, 'Logarit cơ số a'),
+      q('DL06', 'y=\\log_3x', '\\frac{1}{x\\ln 3}', ['\\frac{1}{x}', '\\frac{\\ln 3}{x}', '\\frac{1}{3x}'], 1, 'Logarit cơ số a'),
+      q('DL07', 'y=e^{-x}', '-e^{-x}', ['e^{-x}', '-xe^{-x}', 'e^x'], 1, 'Hàm mũ e'),
+      q('DL08', 'y=10^x', '10^x\\ln 10', ['10^x', '10x^9', 'x10^{x-1}'], 1, 'Hàm mũ cơ số a'),
+
+      q('DL09', 'y=e^{2x}', '2e^{2x}', ['e^{2x}', '2xe^{2x}', 'e^{x}'], 2, 'Hàm mũ hợp'),
+      q('DL10', 'y=e^{3x-1}', '3e^{3x-1}', ['e^{3x-1}', '(3x-1)e^{3x-1}', '3e^{3x}'], 2, 'Hàm mũ hợp'),
+      q('DL11', 'y=2^{3x}', '3\\cdot2^{3x}\\ln 2', ['2^{3x}\\ln 2', '3\\cdot2^{3x}', '3x2^{3x-1}'], 2, 'Hàm mũ hợp'),
+      q('DL12', 'y=5^{2x+1}', '2\\cdot5^{2x+1}\\ln 5', ['5^{2x+1}\\ln 5', '2\\cdot5^{2x+1}', '(2x+1)5^{2x}'], 2, 'Hàm mũ hợp'),
+      q('DL13', 'y=\\ln(2x+1)', '\\frac{2}{2x+1}', ['\\frac{1}{2x+1}', '\\frac{2}{x}', '\\ln(2x+1)'], 2, 'Logarit hợp'),
+      q('DL14', 'y=\\ln(x^2+1)', '\\frac{2x}{x^2+1}', ['\\frac{1}{x^2+1}', '\\frac{x}{x^2+1}', '\\frac{2x}{(x^2+1)^2}'], 2, 'Logarit hợp'),
+      q('DL15', 'y=\\log_2(3x+1)', '\\frac{3}{(3x+1)\\ln 2}', ['\\frac{1}{(3x+1)\\ln 2}', '\\frac{3}{3x+1}', '\\frac{3\\ln 2}{3x+1}'], 2, 'Logarit hợp'),
+      q('DL16', 'y=\\log_5(x^2+1)', '\\frac{2x}{(x^2+1)\\ln 5}', ['\\frac{1}{(x^2+1)\\ln 5}', '\\frac{2x}{x^2+1}', '\\frac{2x\\ln 5}{x^2+1}'], 2, 'Logarit hợp'),
+
+      q('DL17', 'y=e^{x^2}', '2xe^{x^2}', ['e^{x^2}', '2e^{x^2}', 'x^2e^{x^2}'], 3, 'Hàm mũ hợp'),
+      q('DL18', 'y=2^{x^2+1}', '2x\\cdot2^{x^2+1}\\ln 2', ['2^{x^2+1}\\ln 2', '2x\\cdot2^{x^2+1}', '(x^2+1)2^{x^2}'], 3, 'Hàm mũ hợp'),
+      q('DL19', 'y=\\ln(\\sin x)', '\\frac{\\cos x}{\\sin x}', ['\\frac{1}{\\sin x}', '-\\frac{\\sin x}{\\cos x}', '\\cos x'], 3, 'Logarit hợp'),
+      q('DL20', 'y=\\log_3(\\sin x)', '\\frac{\\cos x}{\\sin x\\ln 3}', ['\\frac{1}{\\sin x\\ln 3}', '\\frac{\\cos x}{\\sin x}', '-\\frac{\\sin x}{\\cos x\\ln 3}'], 3, 'Logarit hợp'),
+      q('DL21', 'y=e^{\\sin x}', '\\cos x\\,e^{\\sin x}', ['e^{\\sin x}', '\\sin x\\,e^{\\sin x}', '-\\sin x\\,e^{\\sin x}'], 3, 'Hàm mũ hợp'),
+      q('DL22', 'y=\\ln(x^3-1)', '\\frac{3x^2}{x^3-1}', ['\\frac{1}{x^3-1}', '\\frac{3x}{x^3-1}', '\\frac{3x^2}{(x^3-1)^2}'], 3, 'Logarit hợp'),
+      q('DL23', 'y=xe^x', 'e^x(x+1)', ['xe^x', 'e^x', 'e^x(x-1)'], 3, 'Tích với hàm mũ'),
+      q('DL24', 'y=x\\ln x', '\\ln x+1', ['\\ln x', '\\frac{1}{x}+1', 'x\\ln x+1'], 3, 'Tích với logarit'),
+    ],
+  },
+
+  trig_formulas: {
+    id: 'trig_formulas',
+    subject: 'Toán',
+    title: 'Công thức lượng giác',
+    instruction: 'Chọn công thức đúng:',
+    description: 'Nhận biết các công thức lượng giác thường dùng.',
+    questions: [
+      q('TF01', '\\sin^2x+\\cos^2x=?', '1', ['0', '2', '\\sin 2x'], 1, 'Cơ bản'),
+      q('TF02', '1+\\tan^2x=?', '\\frac{1}{\\cos^2x}', ['\\frac{1}{\\sin^2x}', '1', '\\cos^2x'], 1, 'Cơ bản'),
+      q('TF03', '1+\\cot^2x=?', '\\frac{1}{\\sin^2x}', ['\\frac{1}{\\cos^2x}', '1', '\\sin^2x'], 1, 'Cơ bản'),
+      q('TF04', '\\sin 2x=?', '2\\sin x\\cos x', ['\\sin^2x-\\cos^2x', '2\\sin^2x', '\\sin x+\\cos x'], 1, 'Góc đôi'),
+      q('TF05', '\\cos 2x=?', '\\cos^2x-\\sin^2x', ['2\\sin x\\cos x', '\\sin^2x-\\cos^2x', '\\cos^2x+\\sin^2x'], 1, 'Góc đôi'),
+      q('TF06', '\\tan 2x=?', '\\frac{2\\tan x}{1-\\tan^2x}', ['\\frac{2\\tan x}{1+\\tan^2x}', '\\frac{1-\\tan^2x}{2\\tan x}', '2\\tan x'], 2, 'Góc đôi'),
+      q('TF07', '\\sin(a+b)=?', '\\sin a\\cos b+\\cos a\\sin b', ['\\sin a\\cos b-\\cos a\\sin b', '\\cos a\\cos b-\\sin a\\sin b', '\\sin a+\\sin b'], 2, 'Cộng'),
+      q('TF08', '\\cos(a+b)=?', '\\cos a\\cos b-\\sin a\\sin b', ['\\cos a\\cos b+\\sin a\\sin b', '\\sin a\\cos b+\\cos a\\sin b', '\\cos a+\\cos b'], 2, 'Cộng'),
+      q('TF09', '\\sin(a-b)=?', '\\sin a\\cos b-\\cos a\\sin b', ['\\sin a\\cos b+\\cos a\\sin b', '\\cos a\\cos b-\\sin a\\sin b', '\\sin a-\\sin b'], 2, 'Hiệu'),
+      q('TF10', '\\cos(a-b)=?', '\\cos a\\cos b+\\sin a\\sin b', ['\\cos a\\cos b-\\sin a\\sin b', '\\sin a\\cos b-\\cos a\\sin b', '\\cos a-\\cos b'], 2, 'Hiệu'),
+    ],
+  },
+
+  exponent_log: {
+    id: 'exponent_log',
+    subject: 'Toán',
+    title: 'Mũ và Logarit',
+    instruction: 'Chọn công thức đúng:',
+    description: 'Các công thức biến đổi lũy thừa và logarit cơ bản.',
+    questions: [
+      q('EL01', 'a^m\\cdot a^n=?', 'a^{m+n}', ['a^{mn}', 'a^{m-n}', '2a^{m+n}'], 1, 'Lũy thừa'),
+      q('EL02', '\\frac{a^m}{a^n}=?', 'a^{m-n}', ['a^{m+n}', 'a^{n-m}', 'a^{mn}'], 1, 'Lũy thừa'),
+      q('EL03', '(a^m)^n=?', 'a^{mn}', ['a^{m+n}', 'a^{m-n}', 'a^{m^n}'], 1, 'Lũy thừa'),
+      q('EL04', 'a^{-n}=?', '\\frac{1}{a^n}', ['-a^n', '\\frac{-1}{a^n}', 'a^n'], 1, 'Lũy thừa'),
+      q('EL05', '\\log_a(xy)=?', '\\log_a x+\\log_a y', ['\\log_a x-\\log_a y', '\\log_a(x+y)', '\\log_x a+\\log_y a'], 1, 'Logarit'),
+      q('EL06', '\\log_a\\left(\\frac{x}{y}\\right)=?', '\\log_a x-\\log_a y', ['\\log_a x+\\log_a y', '\\frac{\\log_a x}{\\log_a y}', '\\log_a(x-y)'], 1, 'Logarit'),
+      q('EL07', '\\log_a(x^n)=?', 'n\\log_a x', ['(\\log_a x)^n', '\\log_a x+n', '\\frac{1}{n}\\log_a x'], 2, 'Logarit'),
+      q('EL08', '\\log_a b=?', '\\frac{\\ln b}{\\ln a}', ['\\frac{\\ln a}{\\ln b}', '\\ln a+\\ln b', '\\ln(a-b)'], 2, 'Đổi cơ số'),
+    ],
+  },
+};
+
+function q(id, prompt, answer, distractors, level, group, enabled = true) {
+  return { id, prompt, answer, distractors, level, group, enabled };
+}
+
+export function listQuestionBanks() {
+  return Object.values(QUESTION_BANKS);
+}
+
+export function getQuestionBank(id) {
+  return QUESTION_BANKS[id] || QUESTION_BANKS.derivative_basic;
+}
+
+
+export function normalizeTopicIds(topicIds) {
+  const input = Array.isArray(topicIds) ? topicIds : String(topicIds || '').split(',');
+  const seen = new Set();
+  return input
+    .map((id) => String(id || '').trim())
+    .filter((id) => QUESTION_BANKS[id] && !seen.has(id) && seen.add(id));
+}
+
+export function countAvailableQuestions(topicIds, difficulty = 'normal') {
+  return normalizeTopicIds(topicIds).reduce((total, id) => {
+    return total + filterQuestionsByDifficulty(QUESTION_BANKS[id].questions, difficulty).length;
+  }, 0);
+}
+
+/**
+ * Tạo một ngân hàng câu hỏi ảo từ nhiều chủ đề.
+ * Câu được lấy vòng tròn giữa các chủ đề để số lượng tương đối cân bằng.
+ * Với cùng seed + topicIds + difficulty + questionCount, mọi thiết bị tạo ra cùng tập câu.
+ */
+export function buildMultiTopicQuestionBank(topicIds, {
+  difficulty = 'normal',
+  questionCount = 0,
+  seed = 'multi-topic',
+} = {}) {
+  const ids = normalizeTopicIds(topicIds);
+  if (!ids.length) ids.push('derivative_basic');
+
+  const pools = ids.map((id) => {
+    const bank = QUESTION_BANKS[id];
+    const questions = filterQuestionsByDifficulty(bank.questions, difficulty)
+      .map((question) => ({ ...question, instruction: question.instruction || bank.instruction || 'Chọn đáp án đúng:', sourceBankId: bank.id, sourceTitle: bank.title }));
+    return {
+      id,
+      title: bank.title,
+      questions: seededShuffle(questions, `multi-pool:${seed}:${id}:${difficulty}`),
+      index: 0,
+    };
+  }).filter((pool) => pool.questions.length);
+
+  const available = pools.reduce((sum, pool) => sum + pool.questions.length, 0);
+  const count = normalizeQuestionCount(questionCount, available);
+  if (count < 3) throw new Error('Các chủ đề đã chọn cần có ít nhất 3 câu phù hợp.');
+
+  // Xáo thứ tự ưu tiên chủ đề theo seed, nhưng vẫn lấy vòng tròn để cân bằng.
+  const orderedPools = seededShuffle(pools, `multi-topic-order:${seed}:${ids.join('|')}`);
+  const selected = [];
+  while (selected.length < count) {
+    let addedThisRound = false;
+    for (const pool of orderedPools) {
+      if (selected.length >= count) break;
+      if (pool.index >= pool.questions.length) continue;
+      selected.push(pool.questions[pool.index]);
+      pool.index += 1;
+      addedThisRound = true;
+    }
+    if (!addedThisRound) break;
+  }
+
+  const titles = ids.map((id) => QUESTION_BANKS[id].title);
+  const title = titles.length === 1
+    ? titles[0]
+    : titles.length === 2
+      ? titles.join(' + ')
+      : `Ôn tập ${titles.length} chủ đề`;
+
+  return {
+    id: ids.length === 1 ? ids[0] : `multi_${ids.join('_')}`,
+    subject: 'Toán',
+    title,
+    description: titles.join(' · '),
+    topicIds: ids,
+    sourceTitles: titles,
+    questions: selected,
+    availableCount: available,
+  };
+}
+
+export function findQuestionById(questionId) {
+  const id = String(questionId || '');
+  for (const bank of Object.values(QUESTION_BANKS)) {
+    const found = bank.questions.find((question) => question.id === id);
+    if (found) return { ...found, instruction: found.instruction || bank.instruction || 'Chọn đáp án đúng:', sourceBankId: bank.id, sourceTitle: bank.title };
+  }
+  return null;
+}
