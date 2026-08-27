@@ -5,13 +5,13 @@
 // ============================================================
 
 export const firebaseConfig = {
-  apiKey: 'YOUR_API_KEY',
-  authDomain: 'YOUR_PROJECT_ID.firebaseapp.com',
-  databaseURL: 'https://YOUR_DATABASE_NAME.REGION.firebasedatabase.app',
-  projectId: 'YOUR_PROJECT_ID',
-  storageBucket: 'YOUR_PROJECT_ID.firebasestorage.app',
-  messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-  appId: 'YOUR_APP_ID',
+  apiKey: "AIzaSyD9WZDpws8g4d1ifJVqsKnXcpResQ8qaUg",
+  authDomain: "dap-chuot-kien-thuc.firebaseapp.com",
+  databaseURL: "https://dap-chuot-kien-thuc-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "dap-chuot-kien-thuc",
+  storageBucket: "dap-chuot-kien-thuc.firebasestorage.app",
+  messagingSenderId: "973013634978",
+  appId: "1:973013634978:web:5701ca58ad5ba9bfdeecfb"
 };
 
 export function hasFirebaseConfig() {
