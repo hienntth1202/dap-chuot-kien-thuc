@@ -1,4 +1,17 @@
-# Đập Chuột Kiến Thức V1.5.4
+# Đập Chuột Kiến Thức V1.6
+
+
+## V1.6 — Cuộc đua mèo bắt chuột
+
+- Thiết kế lại phần kết quả đội trên màn hình giáo viên thành **Cuộc đua bắt chuột**.
+- Mỗi đội có một mèo đại diện chạy trên đường đua realtime; vị trí mèo tỉ lệ với tổng điểm đội.
+- Đội dẫn đầu có nhãn **ĐANG DẪN ĐẦU** và vương miện.
+- Cuối đường đua có chuột, phô mai và cờ đích để tạo cảm giác thi đấu rõ hơn.
+- Mỗi làn hiển thị số thành viên, số câu đúng, độ chính xác, phản hồi trung bình và tốc độ câu/phút của đội.
+- Khi điểm đội tăng, làn đua có hiệu ứng nhấn và mèo trượt tới vị trí mới.
+- Khi giáo viên chọn **Ẩn bảng điểm**, điểm và vị trí thực của mèo cũng được che để giữ bất ngờ.
+- Frenzy Mode 30 giây cuối tiếp tục tác động lên phần đường đua.
+- Không thay đổi Firebase, logic điểm, combo, câu hỏi, QR, chia đội hay gameplay học sinh.
 
 ## Hotfix quan trọng
 - Sửa lỗi ES Module trong `js/question-banks.js` ở câu DG18 `(k/u)'`.

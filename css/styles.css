@@ -466,3 +466,162 @@ td { font-size: .91rem; }
 @media (max-width:700px){
   .topic-checklist{grid-template-columns:1fr}.preset-box{align-items:stretch;flex-direction:column}.preset-save-row{flex-direction:column}.qr-box{width:150px;min-height:150px}.qr-box img,.qr-box canvas{max-width:138px}
 }
+
+/* ============================================================
+   V1.6 - CUỘC ĐUA MÈO BẮT CHUỘT (TEACHER TEAM RACE)
+   ============================================================ */
+.team-race-panel {
+  margin-top: 22px;
+  padding: 20px;
+  border: 2px solid #f5d78e;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(245,158,11,.10), transparent 26%),
+    radial-gradient(circle at 92% 0%, rgba(16,185,129,.08), transparent 24%),
+    linear-gradient(180deg,#fffdf8 0%,#fff9ed 100%);
+  box-shadow: 0 16px 38px rgba(120,72,12,.08);
+}
+.team-race-heading {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  text-align:center;
+  margin-bottom:16px;
+}
+.team-race-heading > div:first-child { flex:1; }
+.team-race-kicker {
+  color:#b45309;
+  font-size:.76rem;
+  font-weight:950;
+  letter-spacing:.12em;
+}
+.team-race-heading h2 {
+  margin:4px 0 2px;
+  color:#7c2d12;
+  font-size:clamp(1.35rem,3vw,2rem);
+  letter-spacing:.03em;
+}
+.team-race-heading p { margin:0; color:var(--muted); font-size:.88rem; }
+.race-live-pill {
+  flex:0 0 auto;
+  padding:7px 11px;
+  border-radius:999px;
+  background:#ecfdf5;
+  border:1px solid #a7f3d0;
+  color:#047857;
+  font-weight:950;
+  font-size:.72rem;
+  letter-spacing:.05em;
+  animation:raceLivePulse 1.4s ease infinite;
+}
+.team-race-board { display:grid; gap:14px; }
+.cat-race-lane {
+  --lane:#f59e0b;
+  --lane-soft:#fff7ed;
+  --race-progress:8%;
+  border:2px solid #f2e3bd;
+  border-radius:20px;
+  background:rgba(255,255,255,.90);
+  padding:14px;
+  box-shadow:0 9px 24px rgba(15,23,42,.055);
+  transition:.22s ease;
+  overflow:hidden;
+}
+.cat-race-lane.race-team-1 { --lane:#ef4444; --lane-soft:#fff1f2; }
+.cat-race-lane.race-team-2 { --lane:#3b82f6; --lane-soft:#eff6ff; }
+.cat-race-lane.race-team-3 { --lane:#10b981; --lane-soft:#ecfdf5; }
+.cat-race-lane.race-team-4 { --lane:#f59e0b; --lane-soft:#fffbeb; }
+.cat-race-lane.race-team-5 { --lane:#8b5cf6; --lane-soft:#f5f3ff; }
+.cat-race-lane.race-team-6 { --lane:#ec4899; --lane-soft:#fdf2f8; }
+.cat-race-lane.race-leading {
+  border-color:#f59e0b;
+  box-shadow:0 12px 32px rgba(245,158,11,.16), inset 0 0 0 1px rgba(245,158,11,.08);
+  background:linear-gradient(180deg,#fffefb,#fff8e8);
+}
+.cat-race-lane.race-score-bump { animation:raceLaneBump .55s ease; }
+.cat-race-top { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:9px; }
+.cat-race-team-title { display:flex; align-items:center; gap:10px; min-width:0; }
+.cat-race-team-title strong { display:block; color:#1f2937; font-size:1rem; }
+.cat-race-team-title span:not(.race-rank-badge) { display:block; margin-top:2px; color:var(--muted); font-size:.76rem; }
+.race-rank-badge {
+  width:38px; height:38px; border-radius:50%; display:grid; place-items:center;
+  flex:0 0 38px; font-weight:1000; font-size:1rem; color:#fff;
+  background:linear-gradient(145deg,var(--lane),color-mix(in srgb, var(--lane) 65%, #111 35%));
+  border:3px solid #fff; box-shadow:0 2px 0 rgba(15,23,42,.12),0 0 0 2px color-mix(in srgb,var(--lane) 55%,#fff 45%);
+}
+.race-score-badge {
+  min-width:72px; padding:8px 10px 6px; border-radius:13px; text-align:center;
+  background:color-mix(in srgb,var(--lane) 88%,#111 12%); color:#fff;
+  font-size:1.22rem; line-height:1; font-weight:1000; box-shadow:0 5px 12px rgba(15,23,42,.10);
+}
+.race-score-badge small { display:block; font-size:.57rem; margin-top:4px; letter-spacing:.08em; opacity:.95; }
+.cat-race-track {
+  position:relative; height:74px; border-radius:18px; overflow:hidden;
+  border:2px solid color-mix(in srgb,var(--lane) 55%,#fff 45%);
+  background:linear-gradient(180deg,var(--lane-soft),#fff);
+}
+.race-track-fill {
+  position:absolute; left:0; top:0; bottom:0; width:var(--race-progress);
+  background:linear-gradient(90deg,color-mix(in srgb,var(--lane) 66%,#fff 34%),color-mix(in srgb,var(--lane) 88%,#fff 12%));
+  opacity:.68; transition:width .65s cubic-bezier(.2,.8,.2,1);
+}
+.race-track-dashes {
+  position:absolute; left:16px; right:88px; top:50%; height:3px; transform:translateY(-50%);
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.95) 0 18px,transparent 18px 31px);
+  filter:drop-shadow(0 1px 0 rgba(0,0,0,.06));
+}
+.racing-cat {
+  position:absolute; z-index:4; left:var(--race-progress); bottom:7px; transform:translateX(-55%);
+  display:flex; align-items:center; gap:0; transition:left .65s cubic-bezier(.2,.8,.2,1);
+}
+.cat-body { font-size:2.35rem; line-height:1; filter:drop-shadow(0 5px 4px rgba(15,23,42,.18)); animation:catRun .55s ease-in-out infinite alternate; }
+.cat-dust { margin-left:-5px; font-size:1rem; opacity:.75; animation:dustPuff .8s ease infinite; }
+.race-prey {
+  position:absolute; z-index:3; right:10px; bottom:8px; display:flex; align-items:end; gap:1px;
+  filter:drop-shadow(0 3px 2px rgba(15,23,42,.12));
+}
+.race-prey > span { font-size:1.35rem; }
+.race-prey .race-cheese { font-size:1.45rem; margin-left:2px; }
+.race-prey .race-flag { font-size:1.55rem; margin-left:-3px; transform:translateY(-14px); }
+.race-leader-label {
+  position:absolute; z-index:6; top:5px; left:calc(var(--race-progress) - 3px); transform:translateX(-50%);
+  padding:4px 8px; border-radius:999px; white-space:nowrap;
+  background:#fff; border:1px solid #f59e0b; color:#92400e;
+  font-size:.64rem; font-weight:1000; box-shadow:0 3px 10px rgba(120,72,12,.12);
+  transition:left .65s cubic-bezier(.2,.8,.2,1);
+}
+.cat-race-stats { display:flex; flex-wrap:wrap; gap:6px; margin-top:9px; }
+.cat-race-stats span {
+  padding:6px 9px; border:1px solid #efe2c2; border-radius:999px;
+  background:#fffdf7; color:#6b5b43; font-size:.72rem;
+}
+.cat-race-stats strong { color:#1f2937; }
+.cat-race-track.race-concealed .race-track-fill,
+.cat-race-track.race-concealed .racing-cat,
+.cat-race-track.race-concealed .race-leader-label { opacity:.18; filter:blur(4px); }
+.scores-hidden .team-race-panel .race-score-badge { color:transparent !important; text-shadow:0 0 9px rgba(255,255,255,.9); }
+.teacher-frenzy .team-race-panel { box-shadow:0 0 0 3px rgba(239,68,68,.10),0 18px 40px rgba(239,68,68,.10); }
+.teacher-frenzy .racing-cat { animation:raceFrenzyShake .32s ease infinite alternate; }
+
+@keyframes raceLaneBump { 40%{transform:scale(1.012);box-shadow:0 0 0 5px rgba(245,158,11,.11),0 14px 28px rgba(15,23,42,.07)} }
+@keyframes catRun { from{transform:translateY(0) rotate(-2deg)} to{transform:translateY(-4px) rotate(2deg)} }
+@keyframes dustPuff { 0%{opacity:.2;transform:translateX(4px) scale(.7)} 50%{opacity:.8} 100%{opacity:0;transform:translateX(-7px) scale(1.15)} }
+@keyframes raceLivePulse { 50%{box-shadow:0 0 0 5px rgba(16,185,129,.10)} }
+@keyframes raceFrenzyShake { from{transform:translateX(-55%) rotate(-1deg)} to{transform:translateX(-55%) rotate(2deg)} }
+
+@media (max-width: 760px) {
+  .team-race-panel { padding:13px; border-radius:18px; }
+  .team-race-heading { align-items:flex-start; text-align:left; }
+  .race-live-pill { font-size:.62rem; }
+  .cat-race-lane { padding:10px; }
+  .cat-race-top { align-items:flex-start; }
+  .cat-race-team-title strong { font-size:.9rem; }
+  .race-score-badge { min-width:61px; font-size:1.03rem; }
+  .cat-race-track { height:70px; }
+  .cat-body { font-size:2.05rem; }
+  .race-prey > span { font-size:1.12rem; }
+  .race-prey .race-cheese { font-size:1.25rem; }
+  .race-prey .race-flag { font-size:1.28rem; }
+  .cat-race-stats span { font-size:.66rem; padding:5px 7px; }
+}
