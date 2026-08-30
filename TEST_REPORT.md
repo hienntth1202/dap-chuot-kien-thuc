@@ -1,18 +1,22 @@
-# TEST REPORT — V1.6
+# TEST REPORT — V1.8
 
-## Thay đổi kiểm tra
-- teacher.html: thêm khối `teamRaceBoard`, cập nhật nhãn V1.6.
-- js/teacher.js: render cuộc đua realtime từ dữ liệu đội hiện có, không thay đổi luồng Firebase.
-- css/styles.css: giao diện đường đua, mèo/chuột, leader, animation và responsive.
+## Kiểm tra tĩnh
+- `js/teacher.js`: JavaScript syntax OK (`node --check`).
+- `js/firebase-service.js`: JavaScript syntax OK (`node --check`).
+- `database.rules.json`: JSON hợp lệ.
+- `teacher.html`: không có ID trùng.
 
-## Kiểm tra đã chạy
-- PASS: cú pháp `js/teacher.js` bằng `node --check`.
-- PASS: cú pháp `engine.js`, `firebase-service.js`, `question-banks.js`, `student.js`, `personal.js`, `game-view.js`.
-- PASS: khối đường đua dùng cùng `aggregateTeamScores(players)` với bảng năng lượng cũ.
-- PASS: hỗ trợ 2–6 đội.
-- PASS: Ẩn bảng điểm che cả score và vị trí mèo.
-- PASS: giữ nguyên ID/nút Firebase hiện hữu; không sửa `js/config.js`.
-- PASS: responsive CSS có breakpoint cho mobile.
+## Luồng quyền dự kiến
+1. Chưa đăng nhập: chỉ hiện màn đăng nhập Google; tạo phòng bị ẩn.
+2. Đăng nhập nhưng UID không tồn tại tại `teachers/<UID>`: hiện thông báo chưa được cấp quyền + UID; tạo phòng bị ẩn.
+3. UID có giá trị Boolean `true`: hiện màn tạo phòng và cho phép điều khiển phòng.
+4. Firebase Rules: tạo/sửa cấp phòng yêu cầu `auth.uid` có trong `teachers`; nhánh `players` của phòng đã tồn tại vẫn cho học sinh ghi để giữ mô hình không-login.
+5. Đăng xuất: dừng listeners của giáo viên, ẩn dashboard và quay lại màn đăng nhập.
 
-## Lưu ý
-Gói UPDATE V1.6 chỉ chứa 3 file thay đổi (`teacher.html`, `js/teacher.js`, `css/styles.css`) để không ghi đè cấu hình Firebase thật đang có trong repo của giáo viên.
+## Không thay đổi
+- Luật điểm và combo.
+- QR/mã phòng cho học sinh.
+- Gameplay học sinh.
+- Cuộc đua mèo bắt chuột.
+- Kho câu nguyên hàm V1.7.
+- `js/config.js` không nằm trong patch.

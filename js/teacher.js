@@ -21,6 +21,10 @@ import {
   getRoom,
   initFirebase,
   isClassroomAvailable,
+  listenTeacherAuth,
+  signInTeacherWithGoogle,
+  signOutTeacher,
+  getTeacherAccess,
   listenPlayers,
   listenRoomMeta,
   pauseRoom,
@@ -33,6 +37,7 @@ const banks = listQuestionBanks();
 const bankMap = new Map(banks.map((bank) => [bank.id, bank]));
 
 const els = {
+  teacherAuthPanel: byId('teacherAuthPanel'), teacherGoogleLogin: byId('teacherGoogleLogin'), teacherLogout: byId('teacherLogout'), teacherAuthUser: byId('teacherAuthUser'), teacherAuthName: byId('teacherAuthName'), teacherAuthEmail: byId('teacherAuthEmail'), teacherAuthStatus: byId('teacherAuthStatus'), teacherUidBox: byId('teacherUidBox'), teacherUidText: byId('teacherUidText'), copyTeacherUid: byId('copyTeacherUid'), teacherSession: byId('teacherSession'), teacherSessionEmail: byId('teacherSessionEmail'), teacherSessionLogout: byId('teacherSessionLogout'),
   createPanel: byId('createPanel'), createRoomForm: byId('createRoomForm'), createRoomBtn: byId('createRoomBtn'), createMessage: byId('createMessage'),
   topicChecklist: byId('topicChecklist'), selectAllTopics: byId('selectAllTopics'), clearTopics: byId('clearTopics'),
   difficulty: byId('difficulty'), durationSec: byId('durationSec'), questionCount: byId('questionCount'), questionCountHint: byId('questionCountHint'), teamCount: byId('teamCount'),
@@ -65,6 +70,9 @@ let lastWinnerSession = null;
 let lastCountdownNumber = null;
 let lastFrenzySecond = null;
 let teacherAudioCtx = null;
+let teacherUser = null;
+let teacherAuthorized = false;
+let authInitialized = false;
 
 populateTopics();
 loadPresetList();
@@ -79,15 +87,16 @@ els.loadPreset.addEventListener('click', applySelectedPreset);
 els.deletePreset.addEventListener('click', deleteSelectedPreset);
 
 if (!isClassroomAvailable()) {
-  showCreateError('Chế độ lớp chưa được cấu hình Firebase. Hãy điền cấu hình trong js/config.js trước.');
+  showAuthStatus('Chế độ lớp chưa được cấu hình Firebase. Hãy điền cấu hình trong js/config.js trước.', 'error');
+  els.teacherGoogleLogin.disabled = true;
   els.createRoomBtn.disabled = true;
 } else {
   try {
     initFirebase();
-    const queryRoom = normalizeRoomCode(new URLSearchParams(location.search).get('room'));
-    if (queryRoom.length === 6) restoreRoom(queryRoom);
+    setupTeacherAuthentication();
   } catch (error) {
-    showCreateError(error.message);
+    showAuthStatus(error.message, 'error');
+    els.teacherGoogleLogin.disabled = true;
     els.createRoomBtn.disabled = true;
   }
 }
@@ -95,6 +104,7 @@ if (!isClassroomAvailable()) {
 els.createRoomForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   clearCreateMessage();
+  if (!teacherAuthorized) return showCreateError('Tài khoản này chưa được cấp quyền tạo phòng.');
   const topicIds = selectedTopicIds();
   if (!topicIds.length) return showCreateError('Hãy chọn ít nhất 1 chủ đề.');
   els.createRoomBtn.disabled = true;
@@ -170,6 +180,107 @@ els.toggleScores.addEventListener('click', () => {
 els.closeWinner.addEventListener('click', () => els.winnerModal.classList.add('hidden'));
 
 setupMusicControls();
+
+function setupTeacherAuthentication() {
+  if (authInitialized) return;
+  authInitialized = true;
+
+  els.teacherGoogleLogin?.addEventListener('click', async () => {
+    els.teacherGoogleLogin.disabled = true;
+    showAuthStatus('Đang mở cửa sổ đăng nhập Google…');
+    try {
+      await signInTeacherWithGoogle();
+    } catch (error) {
+      const message = error?.code === 'auth/unauthorized-domain'
+        ? 'Tên miền website chưa được thêm vào Authorized domains của Firebase Authentication.'
+        : (error?.message || 'Không đăng nhập được bằng Google.');
+      showAuthStatus(message, 'error');
+    } finally {
+      els.teacherGoogleLogin.disabled = false;
+    }
+  });
+
+  const logoutTeacherNow = async () => { try { await signOutTeacher(); } catch (error) { showAuthStatus(error.message, 'error'); } };
+  els.teacherLogout?.addEventListener('click', logoutTeacherNow);
+  els.teacherSessionLogout?.addEventListener('click', logoutTeacherNow);
+
+  els.copyTeacherUid?.addEventListener('click', async () => {
+    const uid = teacherUser?.uid || '';
+    if (!uid) return;
+    try {
+      await navigator.clipboard.writeText(uid);
+      showAuthStatus('Đã copy UID. Hãy thêm UID này vào nhánh teachers trong Firebase.', 'success');
+    } catch {
+      window.prompt('Copy UID này:', uid);
+    }
+  });
+
+  listenTeacherAuth(async (user) => {
+    teacherUser = user || null;
+    teacherAuthorized = false;
+    stopTeacherRoomListeners();
+    els.teacherSession.classList.add('hidden');
+    els.teacherAuthPanel.classList.remove('hidden');
+
+    if (!user) {
+      els.teacherAuthPanel.classList.remove('hidden');
+      els.teacherGoogleLogin.classList.remove('hidden');
+      els.teacherAuthUser.classList.add('hidden');
+      els.teacherUidBox.classList.add('hidden');
+      els.teacherSession.classList.add('hidden');
+      els.createPanel.classList.add('hidden');
+      els.dashboard.classList.add('hidden');
+      showAuthStatus('Hãy đăng nhập bằng tài khoản Google đã được chủ game cấp quyền.');
+      return;
+    }
+
+    els.teacherGoogleLogin.classList.add('hidden');
+    els.teacherAuthUser.classList.remove('hidden');
+    els.teacherAuthName.textContent = user.displayName || 'Giáo viên';
+    els.teacherAuthEmail.textContent = user.email || '';
+    els.teacherSessionEmail.textContent = user.email || user.displayName || 'Giáo viên';
+    els.teacherUidText.textContent = user.uid;
+    els.teacherUidBox.classList.remove('hidden');
+    showAuthStatus('Đang kiểm tra quyền giáo viên…');
+
+    const access = await getTeacherAccess(user);
+    if (!access.approved) {
+      els.createPanel.classList.add('hidden');
+      els.dashboard.classList.add('hidden');
+      showAuthStatus('Tài khoản đã đăng nhập nhưng chưa được cấp quyền tạo game. Hãy gửi UID bên dưới cho chủ game để được duyệt.', 'error');
+      return;
+    }
+
+    teacherAuthorized = true;
+    els.teacherSession.classList.remove('hidden');
+    els.teacherUidBox.classList.add('hidden');
+    els.teacherAuthPanel.classList.add('hidden');
+    els.createPanel.classList.remove('hidden');
+    showAuthStatus('');
+
+    const queryRoom = normalizeRoomCode(new URLSearchParams(location.search).get('room'));
+    if (queryRoom.length === 6) restoreRoom(queryRoom);
+  });
+}
+
+function stopTeacherRoomListeners() {
+  unsubMeta?.(); unsubMeta = null;
+  unsubPlayers?.(); unsubPlayers = null;
+  if (timerHandle) { clearInterval(timerHandle); timerHandle = null; }
+  if (countdownHandle) { clearInterval(countdownHandle); countdownHandle = null; }
+  roomCode = null;
+  currentMeta = null;
+  players = {};
+}
+
+function showAuthStatus(message, type = 'info') {
+  if (!els.teacherAuthStatus) return;
+  if (!message) { els.teacherAuthStatus.innerHTML = ''; return; }
+  const cls = type === 'error' ? 'notice-error' : type === 'success' ? 'notice-success' : '';
+  els.teacherAuthStatus.innerHTML = cls
+    ? `<div class="notice ${cls}">${escapeHtml(message)}</div>`
+    : `<div class="teacher-auth-hint">${escapeHtml(message)}</div>`;
+}
 
 async function beginRound(reshuffleTeams) {
   if (!roomCode) return;

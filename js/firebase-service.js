@@ -9,11 +9,19 @@ import {
   onDisconnect,
   serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js';
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+} from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js';
 import { firebaseConfig, hasFirebaseConfig } from './config.js';
 import { normalizeName, normalizeRoomCode } from './engine.js';
 
 let app = null;
 let db = null;
+let auth = null;
 let serverOffsetMs = 0;
 let offsetUnsubscribe = null;
 
@@ -29,12 +37,43 @@ export function initFirebase() {
   if (!app) {
     app = initializeApp(firebaseConfig);
     db = getDatabase(app);
+    auth = getAuth(app);
     const offsetRef = ref(db, '.info/serverTimeOffset');
     offsetUnsubscribe = onValue(offsetRef, (snapshot) => {
       serverOffsetMs = Number(snapshot.val()) || 0;
     });
   }
   return db;
+}
+
+
+export function listenTeacherAuth(callback) {
+  initFirebase();
+  return onAuthStateChanged(auth, callback);
+}
+
+export async function signInTeacherWithGoogle() {
+  initFirebase();
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+  const result = await signInWithPopup(auth, provider);
+  return result.user;
+}
+
+export async function signOutTeacher() {
+  initFirebase();
+  await signOut(auth);
+}
+
+export async function getTeacherAccess(user) {
+  initFirebase();
+  if (!user?.uid) return { approved: false, uid: null };
+  try {
+    const snapshot = await get(ref(db, `teachers/${user.uid}`));
+    return { approved: snapshot.val() === true, uid: user.uid };
+  } catch (error) {
+    return { approved: false, uid: user.uid, error };
+  }
 }
 
 export function getApproxServerNow() {

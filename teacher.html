@@ -11,10 +11,32 @@
 <body>
   <main class="site-shell">
     <div class="topbar">
-      <a class="brand" href="./index.html"><span class="brand-mark">🔨</span><span class="brand-text"><strong>Đập Chuột Kiến Thức</strong><span>Bảng điều khiển giáo viên · V1.6</span></span></a>
+      <a class="brand" href="./index.html"><span class="brand-mark">🔨</span><span class="brand-text"><strong>Đập Chuột Kiến Thức</strong><span>Bảng điều khiển giáo viên · V1.8</span></span></a><div class="teacher-session hidden" id="teacherSession"><span id="teacherSessionEmail"></span><button class="btn btn-light" type="button" id="teacherSessionLogout">Đăng xuất</button></div>
     </div>
 
-    <section class="panel" id="createPanel">
+
+    <section class="panel teacher-auth-panel" id="teacherAuthPanel">
+      <div class="teacher-auth-card">
+        <div class="teacher-auth-icon">🔐</div>
+        <div>
+          <h1 style="margin:0 0 8px">Khu vực giáo viên</h1>
+          <p class="muted" style="margin:0">Đăng nhập bằng Google để tạo và điều khiển phòng chơi.</p>
+        </div>
+        <button class="btn btn-primary" type="button" id="teacherGoogleLogin">Đăng nhập bằng Google</button>
+        <div class="teacher-auth-user hidden" id="teacherAuthUser">
+          <div><strong id="teacherAuthName">Giáo viên</strong><div class="muted small" id="teacherAuthEmail"></div></div>
+          <button class="btn btn-light" type="button" id="teacherLogout">Đăng xuất</button>
+        </div>
+        <div class="teacher-auth-status" id="teacherAuthStatus"></div>
+        <div class="teacher-uid-box hidden" id="teacherUidBox">
+          <div class="small muted">UID tài khoản này</div>
+          <code id="teacherUidText"></code>
+          <button class="btn btn-light" type="button" id="copyTeacherUid">Copy UID</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel hidden" id="createPanel">
       <div class="section-heading">
         <div><h1 style="margin:0">Tạo phòng chơi</h1><p class="muted" style="margin:6px 0 0">Chọn nội dung một lần, học sinh quét QR là vào.</p></div>
         <span class="tag">Không cần tài khoản học sinh</span>

@@ -625,3 +625,18 @@ td { font-size: .91rem; }
   .race-prey .race-flag { font-size:1.28rem; }
   .cat-race-stats span { font-size:.66rem; padding:5px 7px; }
 }
+
+/* =========================
+   V1.8 - TEACHER ACCESS CONTROL
+   ========================= */
+.teacher-auth-panel { max-width:760px; margin:28px auto; }
+.teacher-auth-card { display:grid; gap:16px; justify-items:center; text-align:center; padding:18px 8px; }
+.teacher-auth-icon { width:72px; height:72px; display:grid; place-items:center; border-radius:22px; font-size:34px; background:linear-gradient(180deg,#fff7d6,#ffe8a3); border:1px solid #f3d58a; box-shadow:0 10px 26px rgba(180,110,0,.10); }
+.teacher-auth-user { width:min(520px,100%); display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border:1px solid #e8dfc9; background:#fff; border-radius:16px; text-align:left; }
+.teacher-auth-status { width:min(620px,100%); }
+.teacher-auth-hint { padding:11px 13px; border-radius:14px; background:#f8fafc; border:1px solid #e2e8f0; color:#64748b; font-size:.92rem; }
+.teacher-uid-box { width:min(620px,100%); padding:14px; border-radius:16px; border:1px dashed #f59e0b; background:#fffaf0; }
+.teacher-uid-box code { display:block; margin:7px 0 11px; padding:10px; border-radius:10px; background:#111827; color:#fff; overflow-wrap:anywhere; user-select:all; }
+.teacher-session { display:flex; align-items:center; gap:10px; margin-left:auto; }
+.teacher-session span { font-size:.83rem; color:#64748b; max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+@media (max-width:700px){ .teacher-session span{display:none;} .teacher-auth-user{align-items:flex-start;flex-direction:column;} }

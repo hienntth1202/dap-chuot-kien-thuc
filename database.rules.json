@@ -2,10 +2,21 @@
   "rules": {
     ".read": false,
     ".write": false,
+    "teachers": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": false
+      }
+    },
     "rooms": {
       "$roomCode": {
         ".read": true,
-        ".write": true
+        ".write": "auth != null && root.child('teachers').child(auth.uid).val() === true",
+        "players": {
+          "$playerId": {
+            ".write": "root.child('rooms').child($roomCode).child('meta').exists()"
+          }
+        }
       }
     }
   }
