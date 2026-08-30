@@ -5,7 +5,7 @@
 // ============================================================
 
 export const firebaseConfig = {
-  apiKey: "AIzaSyD9WZDpws8g4d1ifJVqsKnXcpResQ8qaUg",
+  apiKey: "AIzaSyD9WZDpws8g4dlifJVqsKnXcpResQ8qaUg",
   authDomain: "dap-chuot-kien-thuc.firebaseapp.com",
   databaseURL: "https://dap-chuot-kien-thuc-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "dap-chuot-kien-thuc",
