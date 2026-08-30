@@ -65,14 +65,109 @@ export async function signOutTeacher() {
   await signOut(auth);
 }
 
-export async function getTeacherAccess(user) {
+export async function getTeacherAccess(user, { retries = 3 } = {}) {
   initFirebase();
-  if (!user?.uid) return { approved: false, uid: null };
+  if (!user?.uid) {
+    return {
+      approved: false,
+      uid: null,
+      path: null,
+      exists: false,
+      value: null,
+      valueType: 'null',
+      attempts: 0,
+      source: 'none',
+      error: new Error('Không có UID của tài khoản Google.'),
+    };
+  }
+
+  const path = `teachers/${user.uid}`;
+  let lastError = null;
+  let lastToken = null;
+  const maxAttempts = Math.max(1, Number(retries) || 1);
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      // Buộc Firebase làm mới ID token trước khi đọc Realtime Database.
+      // Điều này tránh race-condition ngay sau khi Google Sign-In vừa hoàn tất.
+      lastToken = await user.getIdToken(true);
+      if (attempt > 1) {
+        await new Promise((resolve) => setTimeout(resolve, 250 * attempt));
+      }
+
+      const snapshot = await get(ref(db, path));
+      const value = snapshot.val();
+      return {
+        approved: value === true,
+        uid: user.uid,
+        path,
+        exists: snapshot.exists(),
+        value,
+        valueType: value === null ? 'null' : typeof value,
+        attempts: attempt,
+        source: 'firebase-sdk',
+        error: null,
+      };
+    } catch (error) {
+      lastError = error;
+      if (attempt < maxAttempts) {
+        await new Promise((resolve) => setTimeout(resolve, 350 * attempt));
+      }
+    }
+  }
+
+  // Fallback chẩn đoán qua REST bằng chính ID token vừa refresh.
+  // Nếu SDK gặp race/cache bất thường, REST vẫn cho biết server thực tế trả gì.
   try {
-    const snapshot = await get(ref(db, `teachers/${user.uid}`));
-    return { approved: snapshot.val() === true, uid: user.uid };
-  } catch (error) {
-    return { approved: false, uid: user.uid, error };
+    lastToken = lastToken || await user.getIdToken(true);
+    const baseUrl = String(firebaseConfig.databaseURL || '').replace(/\/$/, '');
+    const url = `${baseUrl}/${encodeURIComponent('teachers')}/${encodeURIComponent(user.uid)}.json?auth=${encodeURIComponent(lastToken)}`;
+    const response = await fetch(url, { cache: 'no-store' });
+    const text = await response.text();
+    let value = null;
+    try { value = text ? JSON.parse(text) : null; } catch { value = text; }
+
+    if (response.ok) {
+      return {
+        approved: value === true,
+        uid: user.uid,
+        path,
+        exists: value !== null,
+        value,
+        valueType: value === null ? 'null' : typeof value,
+        attempts: maxAttempts,
+        source: 'rest-fallback',
+        error: null,
+      };
+    }
+
+    const restError = new Error(`REST ${response.status}: ${text || response.statusText}`);
+    restError.code = `rest/${response.status}`;
+    return {
+      approved: false,
+      uid: user.uid,
+      path,
+      exists: false,
+      value,
+      valueType: value === null ? 'null' : typeof value,
+      attempts: maxAttempts,
+      source: 'rest-fallback',
+      error: restError,
+      sdkError: lastError,
+    };
+  } catch (restFailure) {
+    return {
+      approved: false,
+      uid: user.uid,
+      path,
+      exists: false,
+      value: null,
+      valueType: 'unknown',
+      attempts: maxAttempts,
+      source: 'failed',
+      error: restFailure || lastError,
+      sdkError: lastError,
+    };
   }
 }
 

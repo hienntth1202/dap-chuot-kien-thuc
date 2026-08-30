@@ -1,26 +1,22 @@
-# Đập Chuột Kiến Thức V1.8
+# Đập Chuột Kiến Thức V1.8.1
 
-## V1.8 — Teacher Access Control
+## Hotfix Teacher Access
 
-- Khu vực giáo viên bắt buộc đăng nhập Google.
-- Chỉ tài khoản có Firebase Authentication UID được cấp quyền trong `teachers/<UID> = true` mới được tạo/điều khiển phòng.
-- Tài khoản chưa được duyệt sẽ thấy UID để gửi cho chủ game, nhưng không thấy màn tạo phòng.
-- Có nút đăng xuất ở thanh trên cùng sau khi được cấp quyền.
-- Học sinh vẫn vào bằng mã phòng/QR và không cần tài khoản.
-- Firebase Rules mới chặn người không được duyệt tạo/sửa `meta` phòng; học sinh vẫn có thể ghi dữ liệu ở `players` của phòng đã tồn tại.
-- V1.8 giữ nguyên cuộc đua mèo bắt chuột V1.6 và các chủ đề nguyên hàm V1.7.
+V1.8.1 tập trung sửa và chẩn đoán chính xác lỗi giáo viên đã thêm UID nhưng trang vẫn báo chưa được cấp quyền.
 
-## Cấp quyền giáo viên
+### Thay đổi
+- Buộc làm mới Firebase ID token trước khi đọc `teachers/<UID>`.
+- Tự retry tối đa 4 lần để tránh race-condition sau Google Sign-In.
+- Nút **Kiểm tra lại quyền** không cần đăng xuất/đăng nhập lại.
+- Hiển thị chẩn đoán thực tế từ Firebase: path, exists, value, type, số lần thử và error code.
+- Phân biệt rõ 4 lỗi: permission denied, không tìm thấy UID, Value là chuỗi `"true"`, Value Boolean `false`.
+- Nút **Copy chẩn đoán** để gửi nguyên trạng lỗi.
+- Không chứa `js/config.js`; không ghi đè Firebase config hiện tại.
 
-1. Bật Google trong Firebase Authentication.
-2. Thêm domain Render vào Authentication > Settings > Authorized domains: `dap-chuot-kien-thuc.onrender.com`.
-3. Deploy V1.8.
-4. Giáo viên mở `teacher.html`, đăng nhập Google. Nếu chưa được duyệt, trang sẽ hiện UID.
-5. Trong Realtime Database > Data, tạo `teachers/<UID> = true` (Boolean).
-6. Dán rules từ `database.rules.json` vào Realtime Database > Rules và Publish.
+### Cấu trúc quyền chuẩn
+```
+teachers
+  <FIREBASE_AUTH_UID>: true   // Boolean
+```
 
-> Lưu ý: UID là khóa dùng cho Security Rules. Email chỉ dùng để nhận biết tài khoản; không dùng email đã thay dấu chấm làm khóa cấp quyền ở V1.8.
-
-## Firebase config
-
-Bản UPDATE không chứa `js/config.js`, vì vậy không ghi đè cấu hình Firebase hiện tại của giáo viên.
+Rules vẫn dùng UID của Firebase Authentication.

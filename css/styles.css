@@ -640,3 +640,15 @@ td { font-size: .91rem; }
 .teacher-session { display:flex; align-items:center; gap:10px; margin-left:auto; }
 .teacher-session span { font-size:.83rem; color:#64748b; max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 @media (max-width:700px){ .teacher-session span{display:none;} .teacher-auth-user{align-items:flex-start;flex-direction:column;} }
+
+
+/* V1.8.1 - Teacher access diagnostics */
+.teacher-auth-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+.teacher-auth-debug{width:min(760px,100%);margin-top:14px;border:1px dashed #f0b54a;border-radius:16px;background:#fffaf0;padding:12px 14px;text-align:left}
+.teacher-auth-debug summary{cursor:pointer;font-weight:800;color:#7c4a03}
+.teacher-auth-debug-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px 12px;margin:12px 0}
+.teacher-auth-debug-grid>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.teacher-auth-debug-grid>div.full{grid-column:1/-1}
+.teacher-auth-debug-grid span{font-size:12px;color:var(--muted)}
+.teacher-auth-debug-grid code{display:block;white-space:pre-wrap;overflow-wrap:anywhere;background:#111827;color:#f8fafc;border-radius:9px;padding:8px 9px;font-size:12px}
+@media(max-width:640px){.teacher-auth-debug-grid{grid-template-columns:1fr}.teacher-auth-debug-grid>div.full{grid-column:auto}}

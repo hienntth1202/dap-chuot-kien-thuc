@@ -1,22 +1,24 @@
-# TEST REPORT — V1.8
+# TEST REPORT — V1.8.1
 
 ## Kiểm tra tĩnh
-- `js/teacher.js`: JavaScript syntax OK (`node --check`).
-- `js/firebase-service.js`: JavaScript syntax OK (`node --check`).
+- `js/teacher.js`: syntax check.
+- `js/firebase-service.js`: syntax check.
 - `database.rules.json`: JSON hợp lệ.
-- `teacher.html`: không có ID trùng.
+- `teacher.html`: các ID chẩn đoán mới không trùng.
 
-## Luồng quyền dự kiến
-1. Chưa đăng nhập: chỉ hiện màn đăng nhập Google; tạo phòng bị ẩn.
-2. Đăng nhập nhưng UID không tồn tại tại `teachers/<UID>`: hiện thông báo chưa được cấp quyền + UID; tạo phòng bị ẩn.
-3. UID có giá trị Boolean `true`: hiện màn tạo phòng và cho phép điều khiển phòng.
-4. Firebase Rules: tạo/sửa cấp phòng yêu cầu `auth.uid` có trong `teachers`; nhánh `players` của phòng đã tồn tại vẫn cho học sinh ghi để giữ mô hình không-login.
-5. Đăng xuất: dừng listeners của giáo viên, ẩn dashboard và quay lại màn đăng nhập.
+## Luồng kiểm tra quyền
+1. Google Auth trả về user + UID.
+2. `getIdToken(true)` buộc refresh token.
+3. Đọc đúng `teachers/<UID>`.
+4. Retry tối đa 4 lần khi Firebase trả lỗi.
+5. Chỉ Boolean `true` được coi là approved.
+6. Nếu không approved, UI hiện chính xác `exists/value/type/error`.
+7. Có nút kiểm tra lại quyền và copy chẩn đoán.
 
 ## Không thay đổi
-- Luật điểm và combo.
-- QR/mã phòng cho học sinh.
-- Gameplay học sinh.
-- Cuộc đua mèo bắt chuột.
-- Kho câu nguyên hàm V1.7.
+- Gameplay, điểm/combo.
+- Học sinh không cần đăng nhập.
+- QR/mã phòng.
+- Cuộc đua mèo.
+- Nguyên hàm V1.7.
 - `js/config.js` không nằm trong patch.

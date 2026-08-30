@@ -11,7 +11,7 @@
 <body>
   <main class="site-shell">
     <div class="topbar">
-      <a class="brand" href="./index.html"><span class="brand-mark">🔨</span><span class="brand-text"><strong>Đập Chuột Kiến Thức</strong><span>Bảng điều khiển giáo viên · V1.8</span></span></a><div class="teacher-session hidden" id="teacherSession"><span id="teacherSessionEmail"></span><button class="btn btn-light" type="button" id="teacherSessionLogout">Đăng xuất</button></div>
+      <a class="brand" href="./index.html"><span class="brand-mark">🔨</span><span class="brand-text"><strong>Đập Chuột Kiến Thức</strong><span>Bảng điều khiển giáo viên · V1.8.1</span></span></a><div class="teacher-session hidden" id="teacherSession"><span id="teacherSessionEmail"></span><button class="btn btn-light" type="button" id="teacherSessionLogout">Đăng xuất</button></div>
     </div>
 
 
@@ -31,8 +31,24 @@
         <div class="teacher-uid-box hidden" id="teacherUidBox">
           <div class="small muted">UID tài khoản này</div>
           <code id="teacherUidText"></code>
-          <button class="btn btn-light" type="button" id="copyTeacherUid">Copy UID</button>
+          <div class="teacher-auth-actions">
+            <button class="btn btn-light" type="button" id="copyTeacherUid">Copy UID</button>
+            <button class="btn btn-light" type="button" id="recheckTeacherAccess">Kiểm tra lại quyền</button>
+          </div>
         </div>
+        <details class="teacher-auth-debug hidden" id="teacherAuthDebug">
+          <summary>Chẩn đoán quyền giáo viên</summary>
+          <div class="teacher-auth-debug-grid">
+            <div><span>UID</span><code id="debugUid">—</code></div>
+            <div><span>Đường dẫn kiểm tra</span><code id="debugPath">—</code></div>
+            <div><span>Tồn tại</span><code id="debugExists">—</code></div>
+            <div><span>Giá trị Firebase</span><code id="debugValue">—</code></div>
+            <div><span>Kiểu dữ liệu</span><code id="debugType">—</code></div>
+            <div><span>Lần thử</span><code id="debugAttempts">—</code></div>
+            <div class="full"><span>Lỗi Firebase</span><code id="debugError">—</code></div>
+          </div>
+          <button class="btn btn-light" type="button" id="copyTeacherDiagnostic">Copy chẩn đoán</button>
+        </details>
       </div>
     </section>
 

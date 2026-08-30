@@ -37,7 +37,7 @@ const banks = listQuestionBanks();
 const bankMap = new Map(banks.map((bank) => [bank.id, bank]));
 
 const els = {
-  teacherAuthPanel: byId('teacherAuthPanel'), teacherGoogleLogin: byId('teacherGoogleLogin'), teacherLogout: byId('teacherLogout'), teacherAuthUser: byId('teacherAuthUser'), teacherAuthName: byId('teacherAuthName'), teacherAuthEmail: byId('teacherAuthEmail'), teacherAuthStatus: byId('teacherAuthStatus'), teacherUidBox: byId('teacherUidBox'), teacherUidText: byId('teacherUidText'), copyTeacherUid: byId('copyTeacherUid'), teacherSession: byId('teacherSession'), teacherSessionEmail: byId('teacherSessionEmail'), teacherSessionLogout: byId('teacherSessionLogout'),
+  teacherAuthPanel: byId('teacherAuthPanel'), teacherGoogleLogin: byId('teacherGoogleLogin'), teacherLogout: byId('teacherLogout'), teacherAuthUser: byId('teacherAuthUser'), teacherAuthName: byId('teacherAuthName'), teacherAuthEmail: byId('teacherAuthEmail'), teacherAuthStatus: byId('teacherAuthStatus'), teacherUidBox: byId('teacherUidBox'), teacherUidText: byId('teacherUidText'), copyTeacherUid: byId('copyTeacherUid'), recheckTeacherAccess: byId('recheckTeacherAccess'), teacherAuthDebug: byId('teacherAuthDebug'), debugUid: byId('debugUid'), debugPath: byId('debugPath'), debugExists: byId('debugExists'), debugValue: byId('debugValue'), debugType: byId('debugType'), debugAttempts: byId('debugAttempts'), debugError: byId('debugError'), copyTeacherDiagnostic: byId('copyTeacherDiagnostic'), teacherSession: byId('teacherSession'), teacherSessionEmail: byId('teacherSessionEmail'), teacherSessionLogout: byId('teacherSessionLogout'),
   createPanel: byId('createPanel'), createRoomForm: byId('createRoomForm'), createRoomBtn: byId('createRoomBtn'), createMessage: byId('createMessage'),
   topicChecklist: byId('topicChecklist'), selectAllTopics: byId('selectAllTopics'), clearTopics: byId('clearTopics'),
   difficulty: byId('difficulty'), durationSec: byId('durationSec'), questionCount: byId('questionCount'), questionCountHint: byId('questionCountHint'), teamCount: byId('teamCount'),
@@ -181,6 +181,91 @@ els.closeWinner.addEventListener('click', () => els.winnerModal.classList.add('h
 
 setupMusicControls();
 
+function formatTeacherAccessValue(value) {
+  if (value === undefined) return 'undefined';
+  if (value === null) return 'null';
+  if (typeof value === 'string') return `"${value}"`;
+  try { return JSON.stringify(value); } catch { return String(value); }
+}
+
+function renderTeacherAccessDebug(access) {
+  if (!els.teacherAuthDebug) return;
+  els.teacherAuthDebug.classList.remove('hidden');
+  els.debugUid.textContent = access?.uid || teacherUser?.uid || '—';
+  els.debugPath.textContent = access?.path || (teacherUser?.uid ? `teachers/${teacherUser.uid}` : '—');
+  els.debugExists.textContent = access?.exists === true ? 'Có' : access?.exists === false ? 'Không' : '—';
+  els.debugValue.textContent = formatTeacherAccessValue(access?.value);
+  els.debugType.textContent = access?.valueType || '—';
+  els.debugAttempts.textContent = `${access?.attempts ?? '—'} · ${access?.source || '—'}`;
+  const error = access?.error;
+  els.debugError.textContent = error ? `${error.code || 'error'}: ${error.message || error}` : 'Không có lỗi';
+}
+
+function teacherAccessDiagnosticText(access) {
+  const error = access?.error;
+  return [
+    'Đập Chuột Kiến Thức V1.8.1 - Teacher Access Diagnostic',
+    `email=${teacherUser?.email || ''}`,
+    `uid=${access?.uid || teacherUser?.uid || ''}`,
+    `path=${access?.path || ''}`,
+    `approved=${Boolean(access?.approved)}`,
+    `exists=${String(access?.exists)}`,
+    `value=${formatTeacherAccessValue(access?.value)}`,
+    `type=${access?.valueType || ''}`,
+    `attempts=${access?.attempts ?? ''}`,
+    `source=${access?.source || ''}`,
+    `errorCode=${error?.code || ''}`,
+    `errorMessage=${error?.message || ''}`,
+  ].join('\n');
+}
+
+let lastTeacherAccessResult = null;
+
+async function checkCurrentTeacherAccess({ manual = false } = {}) {
+  const user = teacherUser;
+  if (!user) return false;
+  if (manual && els.recheckTeacherAccess) els.recheckTeacherAccess.disabled = true;
+  showAuthStatus(manual ? 'Đang kiểm tra lại quyền trên Firebase…' : 'Đang kiểm tra quyền giáo viên…');
+
+  const access = await getTeacherAccess(user, { retries: 4 });
+  lastTeacherAccessResult = access;
+  renderTeacherAccessDebug(access);
+
+  if (manual && els.recheckTeacherAccess) els.recheckTeacherAccess.disabled = false;
+
+  if (access.approved) {
+    teacherAuthorized = true;
+    els.teacherSession.classList.remove('hidden');
+    els.teacherUidBox.classList.add('hidden');
+    els.teacherAuthDebug.classList.add('hidden');
+    els.teacherAuthPanel.classList.add('hidden');
+    els.createPanel.classList.remove('hidden');
+    showAuthStatus('');
+
+    const queryRoom = normalizeRoomCode(new URLSearchParams(location.search).get('room'));
+    if (queryRoom.length === 6) restoreRoom(queryRoom);
+    return true;
+  }
+
+  teacherAuthorized = false;
+  els.createPanel.classList.add('hidden');
+  els.dashboard.classList.add('hidden');
+  els.teacherUidBox.classList.remove('hidden');
+
+  if (access.error) {
+    showAuthStatus(`Firebase không đọc được quyền giáo viên: ${access.error.code || ''} ${access.error.message || access.error}`.trim(), 'error');
+  } else if (!access.exists) {
+    showAuthStatus('Firebase đọc được dữ liệu nhưng không tìm thấy UID này trong nhánh teachers. Hãy kiểm tra UID có trùng tuyệt đối hay không.', 'error');
+  } else if (access.valueType !== 'boolean') {
+    showAuthStatus(`Đã tìm thấy UID nhưng giá trị đang là kiểu ${access.valueType}. Hãy đặt Value thành Boolean true, không phải chữ "true".`, 'error');
+  } else if (access.value !== true) {
+    showAuthStatus('Đã tìm thấy UID nhưng quyền đang là false. Hãy đổi thành Boolean true.', 'error');
+  } else {
+    showAuthStatus('Tài khoản chưa được cấp quyền tạo game.', 'error');
+  }
+  return false;
+}
+
 function setupTeacherAuthentication() {
   if (authInitialized) return;
   authInitialized = true;
@@ -215,6 +300,17 @@ function setupTeacherAuthentication() {
     }
   });
 
+  els.recheckTeacherAccess?.addEventListener('click', () => checkCurrentTeacherAccess({ manual: true }));
+  els.copyTeacherDiagnostic?.addEventListener('click', async () => {
+    const text = teacherAccessDiagnosticText(lastTeacherAccessResult || { uid: teacherUser?.uid });
+    try {
+      await navigator.clipboard.writeText(text);
+      showAuthStatus('Đã copy thông tin chẩn đoán quyền.', 'success');
+    } catch {
+      window.prompt('Copy chẩn đoán này:', text);
+    }
+  });
+
   listenTeacherAuth(async (user) => {
     teacherUser = user || null;
     teacherAuthorized = false;
@@ -227,6 +323,7 @@ function setupTeacherAuthentication() {
       els.teacherGoogleLogin.classList.remove('hidden');
       els.teacherAuthUser.classList.add('hidden');
       els.teacherUidBox.classList.add('hidden');
+      els.teacherAuthDebug?.classList.add('hidden');
       els.teacherSession.classList.add('hidden');
       els.createPanel.classList.add('hidden');
       els.dashboard.classList.add('hidden');
@@ -241,25 +338,7 @@ function setupTeacherAuthentication() {
     els.teacherSessionEmail.textContent = user.email || user.displayName || 'Giáo viên';
     els.teacherUidText.textContent = user.uid;
     els.teacherUidBox.classList.remove('hidden');
-    showAuthStatus('Đang kiểm tra quyền giáo viên…');
-
-    const access = await getTeacherAccess(user);
-    if (!access.approved) {
-      els.createPanel.classList.add('hidden');
-      els.dashboard.classList.add('hidden');
-      showAuthStatus('Tài khoản đã đăng nhập nhưng chưa được cấp quyền tạo game. Hãy gửi UID bên dưới cho chủ game để được duyệt.', 'error');
-      return;
-    }
-
-    teacherAuthorized = true;
-    els.teacherSession.classList.remove('hidden');
-    els.teacherUidBox.classList.add('hidden');
-    els.teacherAuthPanel.classList.add('hidden');
-    els.createPanel.classList.remove('hidden');
-    showAuthStatus('');
-
-    const queryRoom = normalizeRoomCode(new URLSearchParams(location.search).get('room'));
-    if (queryRoom.length === 6) restoreRoom(queryRoom);
+    await checkCurrentTeacherAccess();
   });
 }
 
