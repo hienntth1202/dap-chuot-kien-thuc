@@ -1,24 +1,15 @@
-# TEST REPORT — V1.8.1
+# V1.8.3 test report
 
-## Kiểm tra tĩnh
-- `js/teacher.js`: syntax check.
-- `js/firebase-service.js`: syntax check.
-- `database.rules.json`: JSON hợp lệ.
-- `teacher.html`: các ID chẩn đoán mới không trùng.
-
-## Luồng kiểm tra quyền
-1. Google Auth trả về user + UID.
-2. `getIdToken(true)` buộc refresh token.
-3. Đọc đúng `teachers/<UID>`.
-4. Retry tối đa 4 lần khi Firebase trả lỗi.
-5. Chỉ Boolean `true` được coi là approved.
-6. Nếu không approved, UI hiện chính xác `exists/value/type/error`.
-7. Có nút kiểm tra lại quyền và copy chẩn đoán.
-
-## Không thay đổi
-- Gameplay, điểm/combo.
-- Học sinh không cần đăng nhập.
-- QR/mã phòng.
-- Cuộc đua mèo.
-- Nguyên hàm V1.7.
-- `js/config.js` không nằm trong patch.
+- JavaScript syntax `teacher.js`: PASS
+- JavaScript syntax `firebase-service.js`: PASS
+- Realtime Database rules JSON parse: PASS
+- Owner email bootstrap preserved: PASS (static logic review)
+- New teacher request is submitted only when teacher record is missing: PASS
+- Approval stores name/email/active instead of boolean only: PASS
+- Existing boolean teacher records remain readable: PASS
+- Active teacher access (`active=true`): PASS (static logic review)
+- Revoked teacher (`active=false`) does not auto-request again: PASS (static logic review)
+- Owner can listen to teacher directory: PASS (rules/static review)
+- Revoke / re-enable / permanent delete actions: PASS (syntax/static review)
+- Classroom/student paths preserved: PASS
+- `js/config.js` excluded from patch: PASS

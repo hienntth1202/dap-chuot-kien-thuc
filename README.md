@@ -1,22 +1,38 @@
-# Đập Chuột Kiến Thức V1.8.1
+# Đập Chuột Kiến Thức V1.8.3
 
-## Hotfix Teacher Access
+## Quản lý giáo viên theo tên/email
 
-V1.8.1 tập trung sửa và chẩn đoán chính xác lỗi giáo viên đã thêm UID nhưng trang vẫn báo chưa được cấp quyền.
+V1.8.3 hoàn thiện cơ chế phân quyền giáo viên để chủ game không cần nhớ UID.
 
-### Thay đổi
-- Buộc làm mới Firebase ID token trước khi đọc `teachers/<UID>`.
-- Tự retry tối đa 4 lần để tránh race-condition sau Google Sign-In.
-- Nút **Kiểm tra lại quyền** không cần đăng xuất/đăng nhập lại.
-- Hiển thị chẩn đoán thực tế từ Firebase: path, exists, value, type, số lần thử và error code.
-- Phân biệt rõ 4 lỗi: permission denied, không tìm thấy UID, Value là chuỗi `"true"`, Value Boolean `false`.
-- Nút **Copy chẩn đoán** để gửi nguyên trạng lỗi.
-- Không chứa `js/config.js`; không ghi đè Firebase config hiện tại.
+- Chủ game `hien.ntt2@greenfield.edu.vn` vẫn vào trực tiếp bằng Google.
+- Giáo viên mới chỉ gửi yêu cầu **một lần đầu tiên**.
+- Khi chủ game bấm **Duyệt**, Firebase lưu đầy đủ:
+  - UID
+  - họ tên Google
+  - email Google
+  - trạng thái `active`
+  - thời điểm duyệt
+- Các lần sau giáo viên đã được duyệt tự vào, không cần duyệt lại.
+- Chủ game có bảng **Quản lý giáo viên** ngay trong trang tạo phòng:
+  - xem tên + email;
+  - Thu hồi quyền;
+  - Cấp lại quyền;
+  - Xóa hẳn khỏi danh sách.
+- `Thu hồi quyền` đặt `active=false` nên giáo viên không tự gửi yêu cầu lại mỗi lần đăng nhập.
+- `Xóa` xóa hẳn bản ghi; nếu giáo viên đăng nhập lại sau đó, họ có thể gửi yêu cầu mới.
+- Tương thích bản ghi cũ `teachers/<uid> = true` để không làm hỏng dữ liệu V1.8/V1.8.2.
+- Học sinh vẫn không cần tài khoản.
+- Patch không chứa `js/config.js`, nên không ghi đè Firebase config hiện tại.
 
-### Cấu trúc quyền chuẩn
-```
+## Cấu trúc Firebase mới
+
+```text
 teachers
-  <FIREBASE_AUTH_UID>: true   // Boolean
+  <uid>
+    active: true
+    displayName: "Nguyễn Văn A"
+    email: "a@school.edu.vn"
+    approvedAt: ...
 ```
 
-Rules vẫn dùng UID của Firebase Authentication.
+Sau khi copy patch lên GitHub/Render, cần copy nội dung `database.rules.json` vào Firebase Console → Realtime Database → Rules → Publish.

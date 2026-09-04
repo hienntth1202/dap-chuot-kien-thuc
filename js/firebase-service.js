@@ -65,6 +65,84 @@ export async function signOutTeacher() {
   await signOut(auth);
 }
 
+export async function submitTeacherAccessRequest(user) {
+  initFirebase();
+  if (!user?.uid) throw new Error('Không có UID tài khoản Google.');
+  const requestRef = ref(db, `teacherRequests/${user.uid}`);
+  await set(requestRef, {
+    email: String(user.email || '').trim().toLowerCase(),
+    displayName: user.displayName || 'Giáo viên',
+    requestedAt: serverTimestamp(),
+  });
+}
+
+export function listenTeacherAccessRequests(callback) {
+  initFirebase();
+  return onValue(ref(db, 'teacherRequests'), (snapshot) => {
+    callback(snapshot.exists() ? snapshot.val() : {});
+  });
+}
+
+export function listenTeacherDirectory(callback) {
+  initFirebase();
+  return onValue(ref(db, 'teachers'), (snapshot) => {
+    callback(snapshot.exists() ? snapshot.val() : {});
+  });
+}
+
+export async function approveTeacherAccess(uid) {
+  initFirebase();
+  if (!uid) throw new Error('Thiếu UID giáo viên.');
+
+  const requestSnapshot = await get(ref(db, `teacherRequests/${uid}`));
+  const request = requestSnapshot.exists() ? requestSnapshot.val() : {};
+  const email = String(request?.email || '').trim().toLowerCase();
+  const displayName = String(request?.displayName || 'Giáo viên').trim() || 'Giáo viên';
+
+  await update(ref(db), {
+    [`teachers/${uid}`]: {
+      active: true,
+      email,
+      displayName,
+      approvedAt: serverTimestamp(),
+    },
+    [`teacherRequests/${uid}`]: null,
+  });
+}
+
+export async function setTeacherAccessActive(uid, active) {
+  initFirebase();
+  if (!uid) throw new Error('Thiếu UID giáo viên.');
+  const snapshot = await get(ref(db, `teachers/${uid}`));
+  if (!snapshot.exists()) throw new Error('Không tìm thấy giáo viên này.');
+  const value = snapshot.val();
+
+  // Tự nâng cấp bản ghi V1.8/V1.8.2 cũ dạng boolean sang object quản lý đầy đủ.
+  if (typeof value === 'boolean') {
+    await set(ref(db, `teachers/${uid}`), {
+      active: Boolean(active),
+      email: '',
+      displayName: 'Bản ghi cũ',
+      approvedAt: serverTimestamp(),
+    });
+    return;
+  }
+
+  await update(ref(db, `teachers/${uid}`), { active: Boolean(active) });
+}
+
+export async function removeTeacherAccess(uid) {
+  initFirebase();
+  if (!uid) throw new Error('Thiếu UID giáo viên.');
+  await set(ref(db, `teachers/${uid}`), null);
+}
+
+export async function rejectTeacherAccess(uid) {
+  initFirebase();
+  if (!uid) throw new Error('Thiếu UID giáo viên.');
+  await set(ref(db, `teacherRequests/${uid}`), null);
+}
+
 export async function getTeacherAccess(user, { retries = 3 } = {}) {
   initFirebase();
   if (!user?.uid) {
@@ -97,8 +175,9 @@ export async function getTeacherAccess(user, { retries = 3 } = {}) {
 
       const snapshot = await get(ref(db, path));
       const value = snapshot.val();
+      const approved = value === true || Boolean(value && typeof value === 'object' && value.active === true);
       return {
-        approved: value === true,
+        approved,
         uid: user.uid,
         path,
         exists: snapshot.exists(),
@@ -128,8 +207,9 @@ export async function getTeacherAccess(user, { retries = 3 } = {}) {
     try { value = text ? JSON.parse(text) : null; } catch { value = text; }
 
     if (response.ok) {
+      const approved = value === true || Boolean(value && typeof value === 'object' && value.active === true);
       return {
-        approved: value === true,
+        approved,
         uid: user.uid,
         path,
         exists: value !== null,

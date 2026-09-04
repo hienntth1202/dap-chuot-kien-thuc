@@ -25,6 +25,13 @@ import {
   signInTeacherWithGoogle,
   signOutTeacher,
   getTeacherAccess,
+  submitTeacherAccessRequest,
+  listenTeacherAccessRequests,
+  listenTeacherDirectory,
+  approveTeacherAccess,
+  rejectTeacherAccess,
+  setTeacherAccessActive,
+  removeTeacherAccess,
   listenPlayers,
   listenRoomMeta,
   pauseRoom,
@@ -33,12 +40,13 @@ import {
 } from './firebase-service.js';
 
 const PRESET_KEY = 'math-mole-teacher-presets-v1';
+const OWNER_TEACHER_EMAIL = 'hien.ntt2@greenfield.edu.vn';
 const banks = listQuestionBanks();
 const bankMap = new Map(banks.map((bank) => [bank.id, bank]));
 
 const els = {
   teacherAuthPanel: byId('teacherAuthPanel'), teacherGoogleLogin: byId('teacherGoogleLogin'), teacherLogout: byId('teacherLogout'), teacherAuthUser: byId('teacherAuthUser'), teacherAuthName: byId('teacherAuthName'), teacherAuthEmail: byId('teacherAuthEmail'), teacherAuthStatus: byId('teacherAuthStatus'), teacherUidBox: byId('teacherUidBox'), teacherUidText: byId('teacherUidText'), copyTeacherUid: byId('copyTeacherUid'), recheckTeacherAccess: byId('recheckTeacherAccess'), teacherAuthDebug: byId('teacherAuthDebug'), debugUid: byId('debugUid'), debugPath: byId('debugPath'), debugExists: byId('debugExists'), debugValue: byId('debugValue'), debugType: byId('debugType'), debugAttempts: byId('debugAttempts'), debugError: byId('debugError'), copyTeacherDiagnostic: byId('copyTeacherDiagnostic'), teacherSession: byId('teacherSession'), teacherSessionEmail: byId('teacherSessionEmail'), teacherSessionLogout: byId('teacherSessionLogout'),
-  createPanel: byId('createPanel'), createRoomForm: byId('createRoomForm'), createRoomBtn: byId('createRoomBtn'), createMessage: byId('createMessage'),
+  createPanel: byId('createPanel'), createRoomForm: byId('createRoomForm'), createRoomBtn: byId('createRoomBtn'), createMessage: byId('createMessage'), teacherApprovalPanel: byId('teacherApprovalPanel'), teacherApprovalList: byId('teacherApprovalList'), teacherDirectoryList: byId('teacherDirectoryList'), teacherDirectoryCount: byId('teacherDirectoryCount'),
   topicChecklist: byId('topicChecklist'), selectAllTopics: byId('selectAllTopics'), clearTopics: byId('clearTopics'),
   difficulty: byId('difficulty'), durationSec: byId('durationSec'), questionCount: byId('questionCount'), questionCountHint: byId('questionCountHint'), teamCount: byId('teamCount'),
   presetSelect: byId('presetSelect'), loadPreset: byId('loadPreset'), deletePreset: byId('deletePreset'), presetName: byId('presetName'), savePreset: byId('savePreset'),
@@ -73,6 +81,10 @@ let teacherAudioCtx = null;
 let teacherUser = null;
 let teacherAuthorized = false;
 let authInitialized = false;
+let unsubTeacherRequests = null;
+let unsubTeacherDirectory = null;
+let teacherRequestsCache = {};
+let teacherDirectoryCache = {};
 
 populateTopics();
 loadPresetList();
@@ -85,6 +97,7 @@ els.clearTopics.addEventListener('click', () => { setAllTopics(false); ensureAtL
 els.savePreset.addEventListener('click', saveCurrentPreset);
 els.loadPreset.addEventListener('click', applySelectedPreset);
 els.deletePreset.addEventListener('click', deleteSelectedPreset);
+els.teacherApprovalPanel?.addEventListener('click', handleTeacherManagementClick);
 
 if (!isClassroomAvailable()) {
   showAuthStatus('Chế độ lớp chưa được cấu hình Firebase. Hãy điền cấu hình trong js/config.js trước.', 'error');
@@ -181,6 +194,158 @@ els.closeWinner.addEventListener('click', () => els.winnerModal.classList.add('h
 
 setupMusicControls();
 
+function normalizedTeacherEmail(user) {
+  return String(user?.email || '').trim().toLowerCase();
+}
+
+function isOwnerTeacher(user) {
+  return normalizedTeacherEmail(user) === OWNER_TEACHER_EMAIL;
+}
+
+function stopTeacherManagementListeners() {
+  unsubTeacherRequests?.();
+  unsubTeacherRequests = null;
+  unsubTeacherDirectory?.();
+  unsubTeacherDirectory = null;
+  teacherRequestsCache = {};
+  teacherDirectoryCache = {};
+  if (els.teacherApprovalPanel) els.teacherApprovalPanel.classList.add('hidden');
+}
+
+function startTeacherManagementListeners() {
+  stopTeacherManagementListeners();
+  if (!isOwnerTeacher(teacherUser) || !els.teacherApprovalPanel) return;
+  els.teacherApprovalPanel.classList.remove('hidden');
+
+  unsubTeacherRequests = listenTeacherAccessRequests((requests) => {
+    teacherRequestsCache = requests || {};
+    renderTeacherManagement();
+  });
+
+  unsubTeacherDirectory = listenTeacherDirectory((directory) => {
+    teacherDirectoryCache = directory || {};
+    renderTeacherManagement();
+  });
+}
+
+function teacherRecordInfo(uid, raw) {
+  if (raw === true || raw === false) {
+    return {
+      uid,
+      active: raw === true,
+      email: '',
+      displayName: 'Bản ghi cũ chưa có tên',
+      legacy: true,
+    };
+  }
+  const item = raw && typeof raw === 'object' ? raw : {};
+  return {
+    uid,
+    active: item.active === true,
+    email: String(item.email || '').trim(),
+    displayName: String(item.displayName || 'Giáo viên').trim() || 'Giáo viên',
+    legacy: false,
+  };
+}
+
+function renderTeacherManagement() {
+  if (!els.teacherApprovalPanel || !isOwnerTeacher(teacherUser)) return;
+
+  const requestEntries = Object.entries(teacherRequestsCache || {})
+    .sort((a, b) => Number(b[1]?.requestedAt || 0) - Number(a[1]?.requestedAt || 0));
+
+  if (els.teacherApprovalList) {
+    if (!requestEntries.length) {
+      els.teacherApprovalList.innerHTML = '<div class="teacher-empty-state">Không có yêu cầu mới.</div>';
+    } else {
+      els.teacherApprovalList.innerHTML = requestEntries.map(([uid, item]) => `
+        <div class="teacher-request-row">
+          <div class="teacher-request-main">
+            <strong>${escapeHtml(item?.displayName || 'Giáo viên')}</strong>
+            <span>${escapeHtml(item?.email || '')}</span>
+          </div>
+          <div class="teacher-request-actions">
+            <button class="btn btn-green" type="button" data-approve-teacher="${escapeHtml(uid)}">Duyệt</button>
+            <button class="btn btn-light" type="button" data-reject-teacher="${escapeHtml(uid)}">Từ chối</button>
+          </div>
+        </div>`).join('');
+    }
+  }
+
+  const records = Object.entries(teacherDirectoryCache || {})
+    .map(([uid, value]) => teacherRecordInfo(uid, value))
+    .sort((a, b) => {
+      if (a.active !== b.active) return a.active ? -1 : 1;
+      return (a.displayName || a.email || a.uid).localeCompare(b.displayName || b.email || b.uid, 'vi');
+    });
+
+  if (els.teacherDirectoryCount) {
+    const activeCount = records.filter((item) => item.active).length;
+    els.teacherDirectoryCount.textContent = `${activeCount} đang được phép · ${records.length} tổng`;
+  }
+
+  if (!els.teacherDirectoryList) return;
+  if (!records.length) {
+    els.teacherDirectoryList.innerHTML = '<div class="teacher-empty-state">Chưa có giáo viên nào được lưu.</div>';
+    return;
+  }
+
+  els.teacherDirectoryList.innerHTML = records.map((item) => {
+    const statusClass = item.active ? 'is-active' : 'is-paused';
+    const statusText = item.active ? 'Được phép' : 'Đã thu hồi';
+    const toggleLabel = item.active ? 'Thu hồi quyền' : 'Cấp lại quyền';
+    const emailText = item.email || (item.legacy ? 'Bản ghi UID cũ – nên xóa nếu không còn dùng' : 'Chưa có email');
+    return `
+      <div class="teacher-directory-row ${statusClass}">
+        <div class="teacher-directory-person">
+          <div class="teacher-avatar">${escapeHtml((item.displayName || 'G').slice(0, 1).toUpperCase())}</div>
+          <div class="teacher-directory-main">
+            <strong>${escapeHtml(item.displayName)}</strong>
+            <span>${escapeHtml(emailText)}</span>
+            ${item.legacy ? '<small>⚠ Dữ liệu cũ V1.8</small>' : ''}
+          </div>
+        </div>
+        <div class="teacher-directory-controls">
+          <span class="teacher-access-pill ${statusClass}">${statusText}</span>
+          <button class="btn btn-light" type="button" data-toggle-teacher="${escapeHtml(item.uid)}" data-active="${item.active ? 'true' : 'false'}">${toggleLabel}</button>
+          <button class="btn btn-red teacher-delete-btn" type="button" data-delete-teacher="${escapeHtml(item.uid)}" data-teacher-label="${escapeHtml(item.email || item.displayName)}">Xóa</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function handleTeacherManagementClick(event) {
+  const approveBtn = event.target.closest('[data-approve-teacher]');
+  const rejectBtn = event.target.closest('[data-reject-teacher]');
+  const toggleBtn = event.target.closest('[data-toggle-teacher]');
+  const deleteBtn = event.target.closest('[data-delete-teacher]');
+  if (!approveBtn && !rejectBtn && !toggleBtn && !deleteBtn) return;
+
+  const button = approveBtn || rejectBtn || toggleBtn || deleteBtn;
+  button.disabled = true;
+  try {
+    if (approveBtn) {
+      await approveTeacherAccess(approveBtn.dataset.approveTeacher || '');
+    } else if (rejectBtn) {
+      await rejectTeacherAccess(rejectBtn.dataset.rejectTeacher || '');
+    } else if (toggleBtn) {
+      const uid = toggleBtn.dataset.toggleTeacher || '';
+      const currentlyActive = toggleBtn.dataset.active === 'true';
+      await setTeacherAccessActive(uid, !currentlyActive);
+    } else if (deleteBtn) {
+      const uid = deleteBtn.dataset.deleteTeacher || '';
+      const label = deleteBtn.dataset.teacherLabel || 'giáo viên này';
+      const confirmed = window.confirm(`Xóa ${label} khỏi danh sách giáo viên được cấp quyền?\n\nNgười này sẽ phải gửi yêu cầu lại nếu muốn dùng game sau này.`);
+      if (!confirmed) return;
+      await removeTeacherAccess(uid);
+    }
+  } catch (error) {
+    showCreateError(error.message || 'Không cập nhật được quyền giáo viên.');
+  } finally {
+    button.disabled = false;
+  }
+}
+
 function formatTeacherAccessValue(value) {
   if (value === undefined) return 'undefined';
   if (value === null) return 'null';
@@ -204,7 +369,7 @@ function renderTeacherAccessDebug(access) {
 function teacherAccessDiagnosticText(access) {
   const error = access?.error;
   return [
-    'Đập Chuột Kiến Thức V1.8.1 - Teacher Access Diagnostic',
+    'Đập Chuột Kiến Thức V1.8.3 - Teacher Access Diagnostic',
     `email=${teacherUser?.email || ''}`,
     `uid=${access?.uid || teacherUser?.uid || ''}`,
     `path=${access?.path || ''}`,
@@ -227,6 +392,34 @@ async function checkCurrentTeacherAccess({ manual = false } = {}) {
   if (manual && els.recheckTeacherAccess) els.recheckTeacherAccess.disabled = true;
   showAuthStatus(manual ? 'Đang kiểm tra lại quyền trên Firebase…' : 'Đang kiểm tra quyền giáo viên…');
 
+  // Chủ game được xác thực trực tiếp bằng email Google đã khóa trong Security Rules.
+  // Cách này loại bỏ hoàn toàn lỗi nhập sai / ký tự ẩn trong UID khi bootstrap tài khoản đầu tiên.
+  if (isOwnerTeacher(user)) {
+    const access = {
+      approved: true,
+      uid: user.uid,
+      path: 'owner-email',
+      exists: true,
+      value: true,
+      valueType: 'boolean',
+      attempts: 0,
+      source: 'owner-email',
+      error: null,
+    };
+    lastTeacherAccessResult = access;
+    teacherAuthorized = true;
+    els.teacherSession.classList.remove('hidden');
+    els.teacherUidBox.classList.add('hidden');
+    els.teacherAuthDebug.classList.add('hidden');
+    els.teacherAuthPanel.classList.add('hidden');
+    els.createPanel.classList.remove('hidden');
+    showAuthStatus('');
+    startTeacherManagementListeners();
+    const queryRoom = normalizeRoomCode(new URLSearchParams(location.search).get('room'));
+    if (queryRoom.length === 6) restoreRoom(queryRoom);
+    return true;
+  }
+
   const access = await getTeacherAccess(user, { retries: 4 });
   lastTeacherAccessResult = access;
   renderTeacherAccessDebug(access);
@@ -241,6 +434,7 @@ async function checkCurrentTeacherAccess({ manual = false } = {}) {
     els.teacherAuthPanel.classList.add('hidden');
     els.createPanel.classList.remove('hidden');
     showAuthStatus('');
+    stopTeacherManagementListeners();
 
     const queryRoom = normalizeRoomCode(new URLSearchParams(location.search).get('room'));
     if (queryRoom.length === 6) restoreRoom(queryRoom);
@@ -256,12 +450,25 @@ async function checkCurrentTeacherAccess({ manual = false } = {}) {
     showAuthStatus(`Firebase không đọc được quyền giáo viên: ${access.error.code || ''} ${access.error.message || access.error}`.trim(), 'error');
   } else if (!access.exists) {
     showAuthStatus('Firebase đọc được dữ liệu nhưng không tìm thấy UID này trong nhánh teachers. Hãy kiểm tra UID có trùng tuyệt đối hay không.', 'error');
-  } else if (access.valueType !== 'boolean') {
-    showAuthStatus(`Đã tìm thấy UID nhưng giá trị đang là kiểu ${access.valueType}. Hãy đặt Value thành Boolean true, không phải chữ "true".`, 'error');
-  } else if (access.value !== true) {
-    showAuthStatus('Đã tìm thấy UID nhưng quyền đang là false. Hãy đổi thành Boolean true.', 'error');
+  } else if (access.value && typeof access.value === 'object' && access.value.active === false) {
+    showAuthStatus('Quyền giáo viên này đã bị chủ game thu hồi. Hãy liên hệ chủ game nếu cần cấp lại.', 'error');
+  } else if (access.valueType !== 'boolean' && access.valueType !== 'object') {
+    showAuthStatus(`Đã tìm thấy UID nhưng dữ liệu quyền không đúng định dạng (${access.valueType}).`, 'error');
+  } else if (access.value === false) {
+    showAuthStatus('Quyền giáo viên này đã bị thu hồi.', 'error');
   } else {
     showAuthStatus('Tài khoản chưa được cấp quyền tạo game.', 'error');
+  }
+
+  // Chỉ gửi yêu cầu ở lần đầu, khi tài khoản chưa có trong danh sách teachers.
+  // Nếu chủ game đã Thu hồi (active=false), không tự gửi yêu cầu lại mỗi lần đăng nhập.
+  if (!access.error && !access.exists) {
+    try {
+      await submitTeacherAccessRequest(user);
+      showAuthStatus('Tài khoản chưa được cấp quyền. Yêu cầu duyệt đã được gửi tới chủ game.', 'error');
+    } catch (requestError) {
+      showAuthStatus(`Chưa được cấp quyền và không gửi được yêu cầu duyệt: ${requestError.message || requestError}`, 'error');
+    }
   }
   return false;
 }
@@ -315,6 +522,7 @@ function setupTeacherAuthentication() {
     teacherUser = user || null;
     teacherAuthorized = false;
     stopTeacherRoomListeners();
+    stopTeacherManagementListeners();
     els.teacherSession.classList.add('hidden');
     els.teacherAuthPanel.classList.remove('hidden');
 

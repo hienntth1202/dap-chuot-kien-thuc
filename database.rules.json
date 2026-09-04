@@ -2,16 +2,29 @@
   "rules": {
     ".read": false,
     ".write": false,
+
     "teachers": {
+      ".read": "auth != null && auth.token.email === 'hien.ntt2@greenfield.edu.vn'",
       "$uid": {
-        ".read": "auth != null && auth.uid === $uid",
-        ".write": false
+        ".read": "auth != null && (auth.uid === $uid || auth.token.email === 'hien.ntt2@greenfield.edu.vn')",
+        ".write": "auth != null && auth.token.email === 'hien.ntt2@greenfield.edu.vn'",
+        ".validate": "!newData.exists() || newData.isBoolean() || (newData.hasChildren(['active','email','displayName']) && newData.child('active').isBoolean() && newData.child('email').isString() && newData.child('displayName').isString())"
       }
     },
+
+    "teacherRequests": {
+      ".read": "auth != null && auth.token.email === 'hien.ntt2@greenfield.edu.vn'",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || auth.token.email === 'hien.ntt2@greenfield.edu.vn')",
+        ".write": "auth != null && (auth.uid === $uid || auth.token.email === 'hien.ntt2@greenfield.edu.vn')"
+      }
+    },
+
     "rooms": {
       "$roomCode": {
         ".read": true,
-        ".write": "auth != null && root.child('teachers').child(auth.uid).val() === true",
+        ".write": "auth != null && (auth.token.email === 'hien.ntt2@greenfield.edu.vn' || root.child('teachers').child(auth.uid).val() === true || root.child('teachers').child(auth.uid).child('active').val() === true)",
+
         "players": {
           "$playerId": {
             ".write": "root.child('rooms').child($roomCode).child('meta').exists()"
