@@ -220,6 +220,95 @@ export const QUESTION_BANKS = {
     ],
   },
 
+
+  integral_substitution: {
+    id: 'integral_substitution',
+    subject: 'Toán',
+    title: 'Đặt ẩn phụ',
+    instruction: 'Để tính nguyên hàm sau bằng phương pháp đặt ẩn phụ, nên đặt:',
+    description: 'Nhìn nhanh cấu trúc hàm hợp và chọn t phù hợp; không yêu cầu tính kết quả nguyên hàm.',
+    questions: [
+      q('IS01', '\\int (2x+1)(x^2+x+3)^5\\,dx', 't=x^2+x+3', ['t=2x+1', 't=(x^2+x+3)^5', 't=x'], 1, 'Hàm hợp lũy thừa'),
+      q('IS02', '\\int 2x\\,e^{x^2}\\,dx', 't=x^2', ['t=2x', 't=e^{x^2}', 't=x'], 1, 'Hàm mũ hàm hợp'),
+      q('IS03', '\\int 3x^2\\cos(x^3+1)\\,dx', 't=x^3+1', ['t=3x^2', 't=\\cos(x^3+1)', 't=x^2'], 1, 'Lượng giác hàm hợp'),
+      q('IS04', '\\int \\frac{2x}{x^2+4}\\,dx', 't=x^2+4', ['t=2x', 't=x^2', 't=\\frac{1}{x^2+4}'], 1, 'Dạng u phẩy trên u'),
+      q('IS05', '\\int \\frac{3x^2}{x^3+2}\\,dx', 't=x^3+2', ['t=3x^2', 't=x^2', 't=x^3'], 1, 'Dạng u phẩy trên u'),
+      q('IS06', '\\int (2x-1)\\sin(x^2-x)\\,dx', 't=x^2-x', ['t=2x-1', 't=\\sin(x^2-x)', 't=x-1'], 1, 'Lượng giác hàm hợp'),
+      q('IS07', '\\int \\frac{4x^3}{x^4+5}\\,dx', 't=x^4+5', ['t=4x^3', 't=x^3', 't=\\frac{1}{x^4+5}'], 1, 'Dạng u phẩy trên u'),
+      q('IS08', '\\int 2x(x^2+1)^4\\,dx', 't=x^2+1', ['t=2x', 't=(x^2+1)^4', 't=x^2'], 1, 'Hàm hợp lũy thừa'),
+
+      q('IS09', '\\int \\frac{2x+3}{x^2+3x+1}\\,dx', 't=x^2+3x+1', ['t=2x+3', 't=x^2+3x', 't=x'], 2, 'Dạng u phẩy trên u'),
+      q('IS10', '\\int (3x^2+2)e^{x^3+2x}\\,dx', 't=x^3+2x', ['t=3x^2+2', 't=e^{x^3+2x}', 't=x^2+2'], 2, 'Hàm mũ hàm hợp'),
+      q('IS11', '\\int \\frac{2x}{\\cos^2(x^2+1)}\\,dx', 't=x^2+1', ['t=2x', 't=\\cos(x^2+1)', 't=x^2'], 2, 'Tan hàm hợp'),
+      q('IS12', '\\int 5x^4\\sin(x^5)\\,dx', 't=x^5', ['t=x^4', 't=5x^4', 't=\\sin(x^5)'], 2, 'Lượng giác hàm hợp'),
+
+      q('IS13', '\\int \\sin^5x\\cos x\\,dx', 't=\\sin x', ['t=\\cos x', 't=\\sin^5x', 't=x'], 1, 'Sin mũ nhân cos'),
+      q('IS14', '\\int \\cos^5x\\sin x\\,dx', 't=\\cos x', ['t=\\sin x', 't=\\cos^5x', 't=x'], 1, 'Cos mũ nhân sin'),
+      q('IS15', '\\int \\sin^7x\\cos x\\,dx', 't=\\sin x', ['t=\\cos x', 't=\\sin^7x', 't=\\tan x'], 1, 'Sin mũ nhân cos'),
+      q('IS16', '\\int \\cos^4x\\sin x\\,dx', 't=\\cos x', ['t=\\sin x', 't=\\tan x', 't=\\cos^4x'], 1, 'Cos mũ nhân sin'),
+
+      q('IS17', '\\int \\tan^5x\\frac{1}{\\cos^2x}\\,dx', 't=\\tan x', ['t=\\cos x', 't=\\sin x', 't=\\frac{1}{\\cos^2x}'], 1, 'Tan mũ nhân sec bình'),
+      q('IS18', '\\int \\frac{\\tan^3x}{\\cos^2x}\\,dx', 't=\\tan x', ['t=\\cos x', 't=\\sin x', 't=\\tan^3x'], 1, 'Tan mũ nhân sec bình'),
+      q('IS19', '\\int \\frac{\\tan^7x}{\\cos^2x}\\,dx', 't=\\tan x', ['t=\\cos x', 't=\\sin x', 't=\\frac{1}{\\cos x}'], 1, 'Tan mũ nhân sec bình'),
+
+      q('IS20', '\\int \\frac{\\cot^5x}{\\sin^2x}\\,dx', 't=\\cot x', ['t=\\sin x', 't=\\cos x', 't=\\tan x'], 1, 'Cot mũ nhân cosec bình'),
+      q('IS21', '\\int \\cot^3x\\frac{1}{\\sin^2x}\\,dx', 't=\\cot x', ['t=\\sin x', 't=\\cos x', 't=\\cot^3x'], 1, 'Cot mũ nhân cosec bình'),
+
+      q('IS22', '\\int \\sin^5(2x+1)\\cos(2x+1)\\,dx', 't=\\sin(2x+1)', ['t=2x+1', 't=\\cos(2x+1)', 't=\\sin^5(2x+1)'], 2, 'Sin mũ hàm hợp'),
+      q('IS23', '\\int \\cos^6(3x-1)\\sin(3x-1)\\,dx', 't=\\cos(3x-1)', ['t=\\sin(3x-1)', 't=3x-1', 't=\\cos^6(3x-1)'], 2, 'Cos mũ hàm hợp'),
+      q('IS24', '\\int \\frac{\\tan^4(2x+3)}{\\cos^2(2x+3)}\\,dx', 't=\\tan(2x+3)', ['t=2x+3', 't=\\cos(2x+3)', 't=\\sin(2x+3)'], 2, 'Tan hàm hợp'),
+      q('IS25', '\\int \\frac{\\cot^3(4x-1)}{\\sin^2(4x-1)}\\,dx', 't=\\cot(4x-1)', ['t=\\sin(4x-1)', 't=4x-1', 't=\\cos(4x-1)'], 2, 'Cot hàm hợp'),
+
+      q('IS26', '\\int \\sqrt{\\sin x}\\cos x\\,dx', 't=\\sin x', ['t=\\cos x', 't=\\sqrt{\\sin x}', 't=x'], 2, 'Căn hàm hợp'),
+      q('IS27', '\\int \\frac{\\cos x}{1+\\sin x}\\,dx', 't=1+\\sin x', ['t=\\cos x', 't=\\sin x\\cos x', 't=x'], 2, 'Dạng u phẩy trên u'),
+      q('IS28', '\\int \\frac{\\sin x}{2+\\cos x}\\,dx', 't=2+\\cos x', ['t=\\sin x', 't=\\tan x', 't=2+\\sin x'], 2, 'Dạng u phẩy trên u'),
+      q('IS29', '\\int e^{\\sin x}\\cos x\\,dx', 't=\\sin x', ['t=e^{\\sin x}', 't=\\cos x', 't=x'], 2, 'Hàm mũ lượng giác'),
+      q('IS30', '\\int e^{\\cos x}\\sin x\\,dx', 't=\\cos x', ['t=\\sin x', 't=e^{\\cos x}', 't=x'], 2, 'Hàm mũ lượng giác'),
+    ],
+  },
+
+  integral_by_parts: {
+    id: 'integral_by_parts',
+    subject: 'Toán',
+    title: 'Nguyên hàm từng phần',
+    instruction: 'Để tính nguyên hàm sau bằng phương pháp nguyên hàm từng phần, nên chọn:',
+    description: 'Chỉ luyện phản xạ chọn u và dv; không yêu cầu tính kết quả nguyên hàm.',
+    questions: [
+      q('IP01', '\\int xe^x\\,dx', 'u=x,\\quad dv=e^x\\,dx', ['u=e^x,\\quad dv=x\\,dx', 'u=xe^x,\\quad dv=dx', 'u=1,\\quad dv=xe^x\\,dx'], 1, 'Đa thức nhân hàm mũ'),
+      q('IP02', '\\int x\\sin x\\,dx', 'u=x,\\quad dv=\\sin x\\,dx', ['u=\\sin x,\\quad dv=x\\,dx', 'u=x\\sin x,\\quad dv=dx', 'u=1,\\quad dv=x\\sin x\\,dx'], 1, 'Đa thức nhân lượng giác'),
+      q('IP03', '\\int x\\cos x\\,dx', 'u=x,\\quad dv=\\cos x\\,dx', ['u=\\cos x,\\quad dv=x\\,dx', 'u=x\\cos x,\\quad dv=dx', 'u=1,\\quad dv=x\\cos x\\,dx'], 1, 'Đa thức nhân lượng giác'),
+      q('IP04', '\\int x^2e^x\\,dx', 'u=x^2,\\quad dv=e^x\\,dx', ['u=e^x,\\quad dv=x^2\\,dx', 'u=x,\\quad dv=xe^x\\,dx', 'u=x^2e^x,\\quad dv=dx'], 1, 'Đa thức nhân hàm mũ'),
+      q('IP05', '\\int x^2\\sin x\\,dx', 'u=x^2,\\quad dv=\\sin x\\,dx', ['u=\\sin x,\\quad dv=x^2\\,dx', 'u=x,\\quad dv=x\\sin x\\,dx', 'u=x^2\\sin x,\\quad dv=dx'], 1, 'Đa thức nhân lượng giác'),
+      q('IP06', '\\int \\ln x\\,dx', 'u=\\ln x,\\quad dv=dx', ['u=1,\\quad dv=\\ln x\\,dx', 'u=x,\\quad dv=\\frac{1}{x}\\,dx', 'u=\\frac{1}{x},\\quad dv=x\\,dx'], 1, 'Logarit'),
+
+      q('IP07', '\\int x\\ln x\\,dx', 'u=\\ln x,\\quad dv=x\\,dx', ['u=x,\\quad dv=\\ln x\\,dx', 'u=x\\ln x,\\quad dv=dx', 'u=\\frac{1}{x},\\quad dv=x^2\\,dx'], 2, 'Đa thức nhân logarit'),
+      q('IP08', '\\int xe^{2x}\\,dx', 'u=x,\\quad dv=e^{2x}\\,dx', ['u=e^{2x},\\quad dv=x\\,dx', 'u=2x,\\quad dv=e^x\\,dx', 'u=xe^{2x},\\quad dv=dx'], 2, 'Đa thức nhân hàm mũ'),
+      q('IP09', '\\int x\\cos 2x\\,dx', 'u=x,\\quad dv=\\cos 2x\\,dx', ['u=\\cos 2x,\\quad dv=x\\,dx', 'u=2x,\\quad dv=\\cos x\\,dx', 'u=x\\cos 2x,\\quad dv=dx'], 2, 'Đa thức nhân lượng giác'),
+      q('IP10', '\\int x^3e^x\\,dx', 'u=x^3,\\quad dv=e^x\\,dx', ['u=e^x,\\quad dv=x^3\\,dx', 'u=x,\\quad dv=x^2e^x\\,dx', 'u=x^3e^x,\\quad dv=dx'], 2, 'Đa thức nhân hàm mũ'),
+      q('IP11', '\\int x^2\\cos x\\,dx', 'u=x^2,\\quad dv=\\cos x\\,dx', ['u=\\cos x,\\quad dv=x^2\\,dx', 'u=x,\\quad dv=x\\cos x\\,dx', 'u=x^2\\cos x,\\quad dv=dx'], 2, 'Đa thức nhân lượng giác'),
+      q('IP12', '\\int (x+1)e^x\\,dx', 'u=x+1,\\quad dv=e^x\\,dx', ['u=e^x,\\quad dv=(x+1)\\,dx', 'u=x,\\quad dv=e^{x+1}\\,dx', 'u=(x+1)e^x,\\quad dv=dx'], 2, 'Đa thức nhân hàm mũ'),
+    ],
+  },
+
+  integral_method_choice: {
+    id: 'integral_method_choice',
+    subject: 'Toán',
+    title: 'Chọn phương pháp nguyên hàm',
+    instruction: 'Nguyên hàm sau nên ưu tiên phương pháp nào?',
+    description: 'Nhận diện thật nhanh: đặt ẩn phụ hay nguyên hàm từng phần.',
+    questions: [
+      q('IM01', '\\int 2x\\,e^{x^2}\\,dx', '\\text{Đặt ẩn phụ}', ['\\text{Nguyên hàm từng phần}', '\\text{Dùng công thức cơ bản trực tiếp}', '\\text{Phân tích thành tổng}'], 1, 'Nhận diện phương pháp'),
+      q('IM02', '\\int xe^x\\,dx', '\\text{Nguyên hàm từng phần}', ['\\text{Đặt ẩn phụ}', '\\text{Dùng công thức cơ bản trực tiếp}', '\\text{Phân tích thành tổng}'], 1, 'Nhận diện phương pháp'),
+      q('IM03', '\\int \\frac{3x^2}{x^3+1}\\,dx', '\\text{Đặt ẩn phụ}', ['\\text{Nguyên hàm từng phần}', '\\text{Dùng công thức cơ bản trực tiếp}', '\\text{Phân tích thành tổng}'], 1, 'Nhận diện phương pháp'),
+      q('IM04', '\\int x\\sin x\\,dx', '\\text{Nguyên hàm từng phần}', ['\\text{Đặt ẩn phụ}', '\\text{Dùng công thức cơ bản trực tiếp}', '\\text{Phân tích thành tổng}'], 1, 'Nhận diện phương pháp'),
+
+      q('IM05', '\\int (2x+1)\\cos(x^2+x)\\,dx', '\\text{Đặt ẩn phụ}', ['\\text{Nguyên hàm từng phần}', '\\text{Dùng công thức cơ bản trực tiếp}', '\\text{Phân tích thành tổng}'], 2, 'Nhận diện phương pháp'),
+      q('IM06', '\\int \\ln x\\,dx', '\\text{Nguyên hàm từng phần}', ['\\text{Đặt ẩn phụ}', '\\text{Dùng công thức cơ bản trực tiếp}', '\\text{Phân tích thành tổng}'], 2, 'Nhận diện phương pháp'),
+      q('IM07', '\\int 4x^3(x^4+2)^5\\,dx', '\\text{Đặt ẩn phụ}', ['\\text{Nguyên hàm từng phần}', '\\text{Dùng công thức cơ bản trực tiếp}', '\\text{Phân tích thành tổng}'], 2, 'Nhận diện phương pháp'),
+      q('IM08', '\\int x\\cos 3x\\,dx', '\\text{Nguyên hàm từng phần}', ['\\text{Đặt ẩn phụ}', '\\text{Dùng công thức cơ bản trực tiếp}', '\\text{Phân tích thành tổng}'], 2, 'Nhận diện phương pháp'),
+    ],
+  },
+
   trig_formulas: {
     id: 'trig_formulas',
     subject: 'Toán',

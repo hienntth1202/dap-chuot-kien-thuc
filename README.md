@@ -1,38 +1,27 @@
-# Đập Chuột Kiến Thức V1.8.3
+# Đập Chuột Kiến Thức V1.9 – Nguyên hàm phản xạ nhanh
 
-## Quản lý giáo viên theo tên/email
+Bản UPDATE này nâng cấp ngân hàng nguyên hàm, giữ nguyên Firebase config và hệ thống quản lý giáo viên V1.8.3.
 
-V1.8.3 hoàn thiện cơ chế phân quyền giáo viên để chủ game không cần nhớ UID.
+## Chủ đề mới
+1. **Đặt ẩn phụ** – 30 câu
+   - Hàm hợp đại số, mũ, lượng giác
+   - Dạng u'/u
+   - sin^n(x)·cos(x), cos^n(x)·sin(x)
+   - tan^n(x)/cos²(x), cot^n(x)/sin²(x)
+   - Các dạng lượng giác có ax+b
+   - e^{sin x}cos x, e^{cos x}sin x, căn/lượng giác đơn giản
 
-- Chủ game `hien.ntt2@greenfield.edu.vn` vẫn vào trực tiếp bằng Google.
-- Giáo viên mới chỉ gửi yêu cầu **một lần đầu tiên**.
-- Khi chủ game bấm **Duyệt**, Firebase lưu đầy đủ:
-  - UID
-  - họ tên Google
-  - email Google
-  - trạng thái `active`
-  - thời điểm duyệt
-- Các lần sau giáo viên đã được duyệt tự vào, không cần duyệt lại.
-- Chủ game có bảng **Quản lý giáo viên** ngay trong trang tạo phòng:
-  - xem tên + email;
-  - Thu hồi quyền;
-  - Cấp lại quyền;
-  - Xóa hẳn khỏi danh sách.
-- `Thu hồi quyền` đặt `active=false` nên giáo viên không tự gửi yêu cầu lại mỗi lần đăng nhập.
-- `Xóa` xóa hẳn bản ghi; nếu giáo viên đăng nhập lại sau đó, họ có thể gửi yêu cầu mới.
-- Tương thích bản ghi cũ `teachers/<uid> = true` để không làm hỏng dữ liệu V1.8/V1.8.2.
-- Học sinh vẫn không cần tài khoản.
-- Patch không chứa `js/config.js`, nên không ghi đè Firebase config hiện tại.
+2. **Nguyên hàm từng phần** – 12 câu
+   - Chỉ hỏi cách chọn `u` và `dv`
+   - Không yêu cầu tính nguyên hàm
 
-## Cấu trúc Firebase mới
+3. **Chọn phương pháp nguyên hàm** – 8 câu
+   - Phản xạ chọn “Đặt ẩn phụ” hoặc “Nguyên hàm từng phần”
 
-```text
-teachers
-  <uid>
-    active: true
-    displayName: "Nguyễn Văn A"
-    email: "a@school.edu.vn"
-    approvedAt: ...
-```
+## Tổng câu mới
+**50 câu**.
 
-Sau khi copy patch lên GitHub/Render, cần copy nội dung `database.rules.json` vào Firebase Console → Realtime Database → Rules → Publish.
+## Cập nhật
+Copy `teacher.html` và thư mục `js` vào repo hiện tại, chọn Replace.
+Bản này **không chứa `js/config.js`**, không làm mất Firebase config.
+Không cần sửa Firebase Rules cho lần cập nhật này.
