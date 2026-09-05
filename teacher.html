@@ -11,7 +11,7 @@
 <body>
   <main class="site-shell">
     <div class="topbar">
-      <a class="brand" href="./index.html"><span class="brand-mark">🔨</span><span class="brand-text"><strong>Đập Chuột Kiến Thức</strong><span>Bảng điều khiển giáo viên · V1.9</span></span></a><div class="teacher-session hidden" id="teacherSession"><span id="teacherSessionEmail"></span><button class="btn btn-light" type="button" id="teacherSessionLogout">Đăng xuất</button></div>
+      <a class="brand" href="./index.html"><span class="brand-mark">🔨</span><span class="brand-text"><strong>Đập Chuột Kiến Thức</strong><span>Bảng điều khiển giáo viên · V1.9.4</span></span></a><div class="teacher-session hidden" id="teacherSession"><span id="teacherSessionEmail"></span><button class="btn btn-light" type="button" id="teacherSessionLogout">Đăng xuất</button></div>
     </div>
 
 
@@ -230,9 +230,19 @@
       <div class="winner-content hidden" id="winnerContent">
         <div class="winner-crown">🏆</div>
         <div class="muted small">ĐỘI CHIẾN THẮNG</div>
-        <h2 id="winnerName">Đội Newton</h2>
+        <h2 id="winnerName">Mèo Mướp</h2>
         <div class="result-score" id="winnerScore">0 điểm</div>
         <div class="podium" id="winnerPodium"></div>
+
+        <details class="winner-team-details" id="winnerTeamDetails">
+          <summary>
+            <span>👥 Xem thành viên đội thắng</span>
+            <span class="winner-member-count" id="winnerMemberCount">0 thành viên</span>
+          </summary>
+          <div class="winner-member-note">Điểm bên dưới là điểm cá nhân thực tế của từng học sinh.</div>
+          <div class="winner-member-list" id="winnerMemberList"></div>
+        </details>
+
         <div class="winner-mistakes"><h3>3 câu lớp cần ôn lại</h3><div id="winnerMistakes"></div></div>
         <div class="actions" style="justify-content:center"><button class="btn btn-primary" type="button" id="closeWinner">Đóng kết quả</button></div>
       </div>

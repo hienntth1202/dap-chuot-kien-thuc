@@ -1,12 +1,12 @@
-# TEST REPORT – V1.9
+# TEST REPORT – V1.9.4
 
-- [x] Thêm 3 ngân hàng nguyên hàm mới.
-- [x] 30 câu đặt ẩn phụ.
-- [x] Có các dạng sin^5x·cosx, tan^5x/cos²x và các biến thể được duyệt.
-- [x] 12 câu từng phần chỉ hỏi chọn u, dv.
-- [x] 8 câu nhận diện phương pháp.
-- [x] Không yêu cầu học sinh tính kết quả nguyên hàm trong 3 chủ đề mới.
-- [x] Mỗi câu có 4 lựa chọn.
-- [x] ID câu hỏi không trùng.
-- [x] Teacher UI tự đọc ngân hàng mới, không cần hard-code topic.
+- [x] TEAM_NAMES có đúng 6 tên mèo mới.
+- [x] teamDisplayName không còn tự thêm chữ "Đội" trước tên mèo.
+- [x] 6 đội ánh xạ 1-1 tới 6 file mascot khác nhau.
+- [x] Không còn mảng 2 mascot luân phiên.
+- [x] 6 mascot đều là WebP 240×240.
+- [x] Tổng dung lượng mascot: 72.1 KB.
+- [x] teacher.js syntax hợp lệ.
+- [x] engine.js syntax hợp lệ.
 - [x] Không chứa config.js.
+- [x] Không cần sửa Realtime Database Rules.

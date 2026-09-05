@@ -57,7 +57,7 @@ const els = {
   classInsights: byId('classInsights'), topMistakes: byId('topMistakes'),
   backgroundMusicFile: byId('backgroundMusicFile'), musicToggle: byId('musicToggle'), musicVolume: byId('musicVolume'), musicName: byId('musicName'),
   teacherCountdown: byId('teacherCountdown'), teacherCountdownText: byId('teacherCountdownText'),
-  winnerModal: byId('winnerModal'), winnerRevealCount: byId('winnerRevealCount'), winnerContent: byId('winnerContent'), winnerName: byId('winnerName'), winnerScore: byId('winnerScore'), winnerPodium: byId('winnerPodium'), winnerMistakes: byId('winnerMistakes'), closeWinner: byId('closeWinner'),
+  winnerModal: byId('winnerModal'), winnerRevealCount: byId('winnerRevealCount'), winnerContent: byId('winnerContent'), winnerName: byId('winnerName'), winnerScore: byId('winnerScore'), winnerPodium: byId('winnerPodium'), winnerTeamDetails: byId('winnerTeamDetails'), winnerMemberCount: byId('winnerMemberCount'), winnerMemberList: byId('winnerMemberList'), winnerMistakes: byId('winnerMistakes'), closeWinner: byId('closeWinner'),
 };
 
 let roomCode = null;
@@ -680,6 +680,7 @@ function renderRoomMeta() {
     <span class="tag">⏱ ${Math.round((Number(currentMeta.durationSec) || 120) / 60)} phút</span>
     <span class="tag">📝 ${Number(currentMeta.questionCount) || 0} câu</span>
     <span class="tag">👥 ${Number(currentMeta.teamCount) || 2} đội</span>
+    <span class="tag">⚖️ Điểm đội chuẩn hóa</span>
     <span class="tag">${statusLabel(currentMeta.status)}</span>`;
 }
 
@@ -722,38 +723,70 @@ function renderPlayers() {
   }).join('');
 }
 
-function renderTeams() {
-  if (!currentMeta) return;
+function getFrozenTeamMembers(teamId, liveMembers = 0) {
+  const frozen = Number(currentMeta?.teamMemberCounts?.[teamId]) || 0;
+  return frozen > 0 ? frozen : Math.max(0, Number(liveMembers) || 0);
+}
+
+function getMaxFrozenTeamMembers(teamData = []) {
+  const frozenMax = Number(currentMeta?.maxTeamMembers) || 0;
+  if (frozenMax > 0) return frozenMax;
+  return Math.max(1, ...teamData.map((team) => Number(team.frozenMembers) || Number(team.members) || 0));
+}
+
+function normalizeTeamRaceScore(rawScore, frozenMembers, maxTeamMembers) {
+  const members = Math.max(1, Number(frozenMembers) || 1);
+  const maxMembers = Math.max(members, Number(maxTeamMembers) || members);
+  return Math.round((Number(rawScore) || 0) * maxMembers / members);
+}
+
+function buildFairTeamData() {
+  if (!currentMeta) return [];
   const count = Number(currentMeta.teamCount) || 2;
   const totals = aggregateTeamScores(players);
   const teamData = [];
   for (let i = 1; i <= count; i += 1) {
     const id = `team-${i}`;
+    const total = totals[id] || { score: 0, members: 0, answered: 0, correct: 0 };
     teamData.push({
       id,
-      ...(totals[id] || { score: 0, members: 0, answered: 0, correct: 0 }),
+      ...total,
+      rawScore: Number(total.score) || 0,
+      frozenMembers: getFrozenTeamMembers(id, total.members),
       ...getTeamSpeedStats(id),
     });
   }
-  if (scoreboardHidden) teamData.sort((a, b) => a.id.localeCompare(b.id));
-  else teamData.sort((a, b) => b.score - a.score || a.id.localeCompare(b.id));
-  const maxScore = Math.max(1, ...teamData.map((team) => team.score));
+  const maxTeamMembers = getMaxFrozenTeamMembers(teamData);
+  teamData.forEach((team) => {
+    team.raceScore = normalizeTeamRaceScore(team.rawScore, team.frozenMembers, maxTeamMembers);
+    // Giữ `score` là điểm đua để các phần xếp hạng/đường đua dùng chung một chuẩn.
+    team.score = team.raceScore;
+  });
+  return teamData;
+}
 
-  // Bảng năng lượng nhỏ bên trái vẫn giữ để giáo viên nhìn nhanh.
+function renderTeams() {
+  if (!currentMeta) return;
+  const teamData = buildFairTeamData();
+  if (scoreboardHidden) teamData.sort((a, b) => a.id.localeCompare(b.id));
+  else teamData.sort((a, b) => b.raceScore - a.raceScore || b.rawScore - a.rawScore || a.id.localeCompare(b.id));
+  const maxScore = Math.max(1, ...teamData.map((team) => team.raceScore));
+
+  // Bảng năng lượng nhỏ bên trái: xếp hạng bằng điểm đua đã chuẩn hóa.
   els.teamList.innerHTML = teamData.map((team, index) => {
     const accuracy = team.answered ? Math.round((team.correct / team.answered) * 100) : 0;
-    const width = scoreboardHidden ? 50 : Math.max(3, Math.round((team.score / maxScore) * 100));
-    const prior = Number(previousTeamTotals[team.id]?.score) || 0;
-    const bumped = playersInitialized && team.score > prior;
+    const width = scoreboardHidden ? 50 : Math.max(3, Math.round((team.raceScore / maxScore) * 100));
+    const prior = Number(previousTeamTotals[team.id]?.raceScore) || 0;
+    const bumped = playersInitialized && team.raceScore > prior;
     return `<div class="team-card team-${team.id.split('-')[1]} ${bumped ? 'energy-bump' : ''}">
-      <div class="team-card-top"><strong>${!scoreboardHidden && index === 0 && team.score > 0 ? '🏆 ' : ''}${teamDisplayName(team.id)}</strong><span class="team-score score-sensitive">${scoreboardHidden ? '???' : team.score}</span></div>
-      <div class="muted small">${team.members} thành viên · ${accuracy}% chính xác</div>
+      <div class="team-card-top"><strong>${!scoreboardHidden && index === 0 && team.raceScore > 0 ? '🏆 ' : ''}${teamDisplayName(team.id)}</strong><span class="team-score score-sensitive">${scoreboardHidden ? '???' : team.raceScore}</span></div>
+      <div class="muted small">${team.frozenMembers} thành viên · ${accuracy}% chính xác${scoreboardHidden ? '' : ` · Tổng thực ${team.rawScore}`}</div>
       <div class="team-progress score-sensitive ${scoreboardHidden ? 'concealed' : ''}"><span style="width:${width}%"></span></div>
     </div>`;
   }).join('');
 
   renderCatRace(teamData, maxScore);
-  previousTeamTotals = totals;
+  previousTeamTotals = Object.fromEntries(teamData.map((team) => [team.id, { raceScore: team.raceScore, rawScore: team.rawScore }]));
 }
 
 function getTeamSpeedStats(teamId) {
@@ -783,22 +816,29 @@ function renderCatRace(teamData, maxScore) {
     return;
   }
 
-  const catIcons = ['🐈', '🐈‍⬛', '😺', '😸', '😼', '😻'];
+  const catMascots = [
+    './assets/cats/cat-tabby.webp',
+    './assets/cats/cat-calico.webp',
+    './assets/cats/cat-golden.webp',
+    './assets/cats/cat-persian.webp',
+    './assets/cats/cat-munchkin.webp',
+    './assets/cats/cat-siamese.webp',
+  ];
   const maxVisibleProgress = 82;
 
   els.teamRaceBoard.innerHTML = teamData.map((team, index) => {
     const teamNumber = Number(team.id.split('-')[1]) || (index + 1);
     const accuracy = team.answered ? Math.round((team.correct / team.answered) * 100) : 0;
-    const rawProgress = maxScore > 0 ? (team.score / maxScore) * maxVisibleProgress : 0;
+    const rawProgress = maxScore > 0 ? (team.raceScore / maxScore) * maxVisibleProgress : 0;
     const progress = scoreboardHidden ? 48 : Math.max(8, Math.min(maxVisibleProgress, rawProgress || 8));
-    const isLeader = !scoreboardHidden && index === 0 && team.score > 0;
-    const scoreText = scoreboardHidden ? '???' : team.score;
+    const isLeader = !scoreboardHidden && index === 0 && team.raceScore > 0;
+    const scoreText = scoreboardHidden ? '???' : team.raceScore;
     const rankText = scoreboardHidden ? '?' : index + 1;
     const responseText = team.avgResponseMs ? `${(team.avgResponseMs / 1000).toFixed(2)}s` : '—';
     const qpmText = team.qpm ? team.qpm.toFixed(1) : '—';
-    const cat = catIcons[(teamNumber - 1) % catIcons.length];
-    const prior = Number(previousTeamTotals[team.id]?.score) || 0;
-    const bumped = playersInitialized && team.score > prior;
+    const cat = catMascots[(teamNumber - 1) % catMascots.length];
+    const prior = Number(previousTeamTotals[team.id]?.raceScore) || 0;
+    const bumped = playersInitialized && team.raceScore > prior;
 
     return `<article class="cat-race-lane race-team-${teamNumber} ${isLeader ? 'race-leading' : ''} ${bumped ? 'race-score-bump' : ''}" style="--race-progress:${progress}%">
       <div class="cat-race-top">
@@ -806,16 +846,16 @@ function renderCatRace(teamData, maxScore) {
           <span class="race-rank-badge">${rankText}</span>
           <div>
             <strong>${isLeader ? '👑 ' : ''}${teamDisplayName(team.id)}</strong>
-            <span>${team.members} thành viên · ${accuracy}% chính xác</span>
+            <span>${team.frozenMembers} thành viên · ${accuracy}% chính xác${scoreboardHidden ? '' : ` · Tổng thực ${team.rawScore}`}</span>
           </div>
         </div>
-        <div class="race-score-badge score-sensitive">${scoreText}<small>ĐIỂM</small></div>
+        <div class="race-score-badge score-sensitive">${scoreText}<small>ĐIỂM ĐUA</small></div>
       </div>
 
       <div class="cat-race-track ${scoreboardHidden ? 'race-concealed' : ''}">
         <div class="race-track-fill"></div>
         <div class="race-track-dashes"></div>
-        <div class="racing-cat" aria-hidden="true"><span class="cat-body">${cat}</span><span class="cat-dust">💨</span></div>
+        <div class="racing-cat" aria-hidden="true"><img class="cat-mascot" src="${cat}" alt=""><span class="cat-dust">💨</span></div>
         <div class="race-prey" aria-hidden="true"><span>🐭</span><span>🐭</span><span class="race-cheese">🧀</span><span class="race-flag">🏁</span></div>
         ${isLeader ? '<div class="race-leader-label">👑 ĐANG DẪN ĐẦU</div>' : ''}
       </div>
@@ -961,15 +1001,57 @@ function renderMistakeItems(container, items) {
   });
 }
 
+
+function getTeamMemberDetails(teamId) {
+  return Object.entries(players || {})
+    .map(([id, player]) => ({ id, ...player }))
+    .filter((player) => player.teamId === teamId)
+    .sort((a, b) =>
+      (Number(b.score) || 0) - (Number(a.score) || 0)
+      || (Number(b.correct) || 0) - (Number(a.correct) || 0)
+      || (Number(a.avgResponseMs) || Number.POSITIVE_INFINITY) - (Number(b.avgResponseMs) || Number.POSITIVE_INFINITY)
+      || String(a.name || '').localeCompare(String(b.name || ''), 'vi')
+    );
+}
+
+function renderWinnerTeamMembers(teamId) {
+  if (!els.winnerMemberList || !els.winnerMemberCount) return;
+  const members = getTeamMemberDetails(teamId);
+  els.winnerMemberCount.textContent = `${members.length} thành viên`;
+
+  if (!members.length) {
+    els.winnerMemberList.innerHTML = '<div class="empty">Chưa có dữ liệu thành viên.</div>';
+    return;
+  }
+
+  els.winnerMemberList.innerHTML = members.map((player, index) => {
+    const answered = Number(player.answered) || 0;
+    const correct = Number(player.correct) || 0;
+    const accuracy = answered ? Math.round((correct / answered) * 100) : 0;
+    const avgResponseMs = Number(player.avgResponseMs) || 0;
+    const responseText = avgResponseMs ? `${(avgResponseMs / 1000).toFixed(2)}s` : '—';
+    const score = Number(player.score) || 0;
+    const medal = ['🥇', '🥈', '🥉'][index] || `#${index + 1}`;
+
+    return `<div class="winner-member-row">
+      <div class="winner-member-name"><span class="winner-member-rank">${medal}</span><strong>${escapeHtml(player.name || 'Học sinh')}</strong></div>
+      <div class="winner-member-stat"><span>Điểm</span><strong>${score}</strong></div>
+      <div class="winner-member-stat"><span>Đúng</span><strong>${correct}/${answered}</strong></div>
+      <div class="winner-member-stat"><span>Chính xác</span><strong>${accuracy}%</strong></div>
+      <div class="winner-member-stat"><span>TB/câu</span><strong>${responseText}</strong></div>
+    </div>`;
+  }).join('');
+}
+
 function showWinnerReveal() {
   if (!currentMeta?.sessionSeed || lastWinnerSession === currentMeta.sessionSeed) return;
   lastWinnerSession = currentMeta.sessionSeed;
-  const totals = aggregateTeamScores(players);
-  const ranking = Object.entries(totals).map(([id, data]) => ({ id, ...data })).sort((a, b) => b.score - a.score || a.id.localeCompare(b.id));
+  const ranking = buildFairTeamData().sort((a, b) => b.raceScore - a.raceScore || b.rawScore - a.rawScore || a.id.localeCompare(b.id));
   if (!ranking.length) return;
   els.winnerModal.classList.remove('hidden');
   els.winnerContent.classList.add('hidden');
   els.winnerRevealCount.classList.remove('hidden');
+  if (els.winnerTeamDetails) els.winnerTeamDetails.open = false;
   let n = 3;
   els.winnerRevealCount.textContent = '3';
   const interval = setInterval(() => {
@@ -981,8 +1063,9 @@ function showWinnerReveal() {
     playTeacherBeep(1120, 0.22);
     const winner = ranking[0];
     els.winnerName.textContent = teamDisplayName(winner.id);
-    els.winnerScore.textContent = `${winner.score} điểm`;
-    els.winnerPodium.innerHTML = ranking.slice(0, 3).map((team, index) => `<div class="podium-row place-${index + 1}"><span>${['🥇','🥈','🥉'][index] || '•'} ${teamDisplayName(team.id)}</span><strong>${team.score}</strong></div>`).join('');
+    els.winnerScore.textContent = `${winner.raceScore} điểm đua`;
+    els.winnerPodium.innerHTML = ranking.slice(0, 3).map((team, index) => `<div class="podium-row place-${index + 1}"><span>${['🥇','🥈','🥉'][index] || '•'} ${teamDisplayName(team.id)}</span><strong>${team.raceScore}</strong></div>`).join('');
+    renderWinnerTeamMembers(winner.id);
     renderMistakeItems(els.winnerMistakes, getTopMistakes(3));
   }, 650);
 }

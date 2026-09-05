@@ -216,13 +216,13 @@ export function createBalancedTeams(playerIds, teamCount, seed = Date.now()) {
   return assignments;
 }
 
-export const TEAM_NAMES = Object.freeze(['Newton', 'Leibniz', 'Gauss', 'Euler', 'Pascal', 'Fermat']);
+export const TEAM_NAMES = Object.freeze(['Mèo Mướp', 'Mèo tam thể', 'Mèo Vàng', 'Mèo Ba Tư', 'Mèo chân ngắn', 'Mèo Xiêm']);
 
 export function teamDisplayName(teamId) {
   const match = String(teamId || '').match(/(\d+)$/);
   if (!match) return 'Chưa chia đội';
   const index = Math.max(0, Number(match[1]) - 1);
-  return `Đội ${TEAM_NAMES[index] || match[1]}`;
+  return TEAM_NAMES[index] || `Đội ${match[1]}`;
 }
 
 export function teamShortName(teamId) {

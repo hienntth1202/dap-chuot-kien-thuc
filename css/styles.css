@@ -575,7 +575,7 @@ td { font-size: .91rem; }
   position:absolute; z-index:4; left:var(--race-progress); bottom:7px; transform:translateX(-55%);
   display:flex; align-items:center; gap:0; transition:left .65s cubic-bezier(.2,.8,.2,1);
 }
-.cat-body { font-size:2.35rem; line-height:1; filter:drop-shadow(0 5px 4px rgba(15,23,42,.18)); animation:catRun .55s ease-in-out infinite alternate; }
+.cat-mascot { width:64px; height:64px; object-fit:contain; display:block; filter:drop-shadow(0 5px 4px rgba(15,23,42,.16)); transform:rotate(-2deg); }
 .cat-dust { margin-left:-5px; font-size:1rem; opacity:.75; animation:dustPuff .8s ease infinite; }
 .race-prey {
   position:absolute; z-index:3; right:10px; bottom:8px; display:flex; align-items:end; gap:1px;
@@ -605,7 +605,6 @@ td { font-size: .91rem; }
 .teacher-frenzy .racing-cat { animation:raceFrenzyShake .32s ease infinite alternate; }
 
 @keyframes raceLaneBump { 40%{transform:scale(1.012);box-shadow:0 0 0 5px rgba(245,158,11,.11),0 14px 28px rgba(15,23,42,.07)} }
-@keyframes catRun { from{transform:translateY(0) rotate(-2deg)} to{transform:translateY(-4px) rotate(2deg)} }
 @keyframes dustPuff { 0%{opacity:.2;transform:translateX(4px) scale(.7)} 50%{opacity:.8} 100%{opacity:0;transform:translateX(-7px) scale(1.15)} }
 @keyframes raceLivePulse { 50%{box-shadow:0 0 0 5px rgba(16,185,129,.10)} }
 @keyframes raceFrenzyShake { from{transform:translateX(-55%) rotate(-1deg)} to{transform:translateX(-55%) rotate(2deg)} }
@@ -619,7 +618,7 @@ td { font-size: .91rem; }
   .cat-race-team-title strong { font-size:.9rem; }
   .race-score-badge { min-width:61px; font-size:1.03rem; }
   .cat-race-track { height:70px; }
-  .cat-body { font-size:2.05rem; }
+  .cat-mascot { width:56px; height:56px; }
   .race-prey > span { font-size:1.12rem; }
   .race-prey .race-cheese { font-size:1.25rem; }
   .race-prey .race-flag { font-size:1.28rem; }
@@ -688,4 +687,113 @@ td { font-size: .91rem; }
   .teacher-directory-row{align-items:flex-start;flex-direction:column}
   .teacher-directory-controls{width:100%;justify-content:flex-start}
   .teacher-directory-controls .btn{flex:1}
+}
+
+
+/* V1.9.2 — Danh sách thành viên đội thắng */
+.winner-team-details{
+  margin:16px 0 4px;
+  border:2px solid #fde68a;
+  border-radius:14px;
+  background:#fffdf5;
+  overflow:hidden;
+  text-align:left;
+}
+.winner-team-details summary{
+  cursor:pointer;
+  list-style:none;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:13px 15px;
+  font-weight:900;
+  color:#92400e;
+  background:#fef3c7;
+  user-select:none;
+}
+.winner-team-details summary::-webkit-details-marker{display:none}
+.winner-team-details summary::after{
+  content:'⌄';
+  font-size:1.35rem;
+  line-height:1;
+  transition:transform .18s ease;
+}
+.winner-team-details[open] summary::after{transform:rotate(180deg)}
+.winner-member-count{
+  margin-left:auto;
+  font-size:.82rem;
+  color:#78350f;
+  background:rgba(255,255,255,.72);
+  border-radius:999px;
+  padding:4px 8px;
+  white-space:nowrap;
+}
+.winner-member-note{
+  padding:9px 14px 3px;
+  color:#64748b;
+  font-size:.82rem;
+}
+.winner-member-list{
+  display:grid;
+  gap:8px;
+  padding:10px 12px 13px;
+}
+.winner-member-row{
+  display:grid;
+  grid-template-columns:minmax(150px,1.6fr) repeat(4,minmax(66px,.7fr));
+  align-items:center;
+  gap:8px;
+  padding:10px 11px;
+  border:1px solid #e2e8f0;
+  border-radius:12px;
+  background:#fff;
+}
+.winner-member-name{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+.winner-member-name strong{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.winner-member-rank{
+  min-width:30px;
+  text-align:center;
+  font-weight:1000;
+}
+.winner-member-stat{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+  text-align:center;
+}
+.winner-member-stat span{
+  color:#64748b;
+  font-size:.7rem;
+  font-weight:700;
+}
+.winner-member-stat strong{
+  font-size:.92rem;
+  color:#0f172a;
+}
+@media (max-width:680px){
+  .winner-team-details summary{align-items:flex-start;flex-wrap:wrap}
+  .winner-member-row{
+    grid-template-columns:1fr 1fr;
+    gap:7px 10px;
+  }
+  .winner-member-name{
+    grid-column:1 / -1;
+    border-bottom:1px dashed #e2e8f0;
+    padding-bottom:7px;
+  }
+  .winner-member-stat{
+    align-items:flex-start;
+    text-align:left;
+  }
 }
